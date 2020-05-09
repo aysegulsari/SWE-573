@@ -1,0 +1,8 @@
+{% extends "base.html"%}
+{% block content %}
+  {% if user.is_authenticated %}
+    <h1>Welcome to HungryForRecipe, {{loggedInUser}}!</h1>
+  {% else %}
+    <h1>Welcome to HungryForRecipe!</h1>
+  {% endif %}
+{% endblock %}
