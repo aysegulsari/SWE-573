@@ -15,5 +15,8 @@
       <input type="submit" name="" value="Login">
 
     </form>
+      {% if not isLoggedIn %}
+      <h6>{{errorMessage}}</h6>
+      {% endif %}
 </div>
 {% endblock %}
