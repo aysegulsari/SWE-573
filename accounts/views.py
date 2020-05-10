@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-
+from django.contrib.auth.forms import PasswordChangeForm
 @login_required
 def user_logout(request):
     # Log out the user.
@@ -84,3 +84,24 @@ def edit_user_profile(request):
     return render(request,'accounts/editProfil.html',
                           {'edit_profile_form':edit_profile_form,
                            'isUpdated':isUpdated})
+
+
+def change_password(request):
+    isChanged = False
+    if request.method == 'POST':
+        change_password_form = PasswordChangeForm(data=request.POST,user=request.user)
+
+        if change_password_form.is_valid():
+            change_password_form.save()
+            isChanged = True
+
+        else:
+            print(change_password_form.errors)
+
+    else:
+        change_password_form = PasswordChangeForm(user=request.user)
+        #edit_profile_form.email=request.user
+
+    return render(request,'accounts/changePassword.html',
+                          {'change_password_form':change_password_form,
+                           'isChanged':isChanged})

@@ -2,21 +2,22 @@
 {% load bootstrap3%}
 {% block content %}
 <div class="container">
-  <h1>Log In</h1>
-    <form method="post" action="{% url 'accounts:user_login' %}">
-      {% csrf_token %}
-      {# A more "HTML" way of creating the login form#}
-      <label for="username">Username:</label>
-      <input type="text" name="username" placeholder="Username">
+    <div class="jumbotron">
+      <h3>Log In</h3>
+        <form method="post" action="{% url 'accounts:user_login' %}">
+          {% csrf_token %}
+          {# A more "HTML" way of creating the login form#}
+          <label for="username">Username:</label>
+          <input type="text" name="username" placeholder="Username">
 
-      <label for="password"></label>
-      <input type="password" name="password">
+          <label for="password"></label>
+          <input type="password" name="password">
 
-      <input type="submit" name="" value="Login">
-
-    </form>
-      {% if not isLoggedIn %}
-      <h6>{{errorMessage}}</h6>
-      {% endif %}
+          <input type="submit" name="" value="Login">
+        </form>
+          {% if not isLoggedIn %}
+          <h6>{{errorMessage}}</h6>
+          {% endif %}
+    </div>      
 </div>
 {% endblock %}

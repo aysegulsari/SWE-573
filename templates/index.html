@@ -1,8 +1,12 @@
 {% extends "base.html"%}
 {% block content %}
+<div class="container">
+  <div class="jumbotron">
   {% if user.is_authenticated %}
-    <h1>Welcome to HungryForRecipe, {{loggedInUser}}!</h1>
+    <h3>Welcome to HungryForRecipe, {{loggedInUser}}!</h3>
   {% else %}
-    <h1>Welcome to HungryForRecipe!</h1>
+    <h3>Welcome to HungryForRecipe!</h3>
   {% endif %}
+  </div>
+</div>
 {% endblock %}

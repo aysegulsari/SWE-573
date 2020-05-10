@@ -4,18 +4,15 @@
 <div class="container">
   <div class="jumbotron">
     {% if isUpdated %}
-      <h1>Your profile info is updated!</h1>
+      <h3>Your profile info is updated!</h3>
     {% else %}
-      <h1>Edit</h1>
+      <h3>Update</h3>
       <form enctype="multipart/form-data" method="POST">
         {{ edit_profile_form.as_p }}
         {% csrf_token %}
         <input type="submit" name="" value="Save">
       </form>
-
     {% endif %}
-
   </div>
-
 </div>
 {% endblock %}
