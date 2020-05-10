@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .forms import UserForm,UserProfileInfoForm
+from .forms import UserForm,UserProfileInfoForm,EditProfileForm
 from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
@@ -43,6 +43,8 @@ def register(request):
                            'registered':registered})
 
 def user_login(request):
+    loginFailed=False
+    errorMessage=""
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -53,11 +55,32 @@ def user_login(request):
                 login(request,user)
                 return HttpResponseRedirect(reverse_lazy("home"))
             else:
-                return HttpResponse("Your account is not active.")
+                loginFailed=True
+                errorMessage="Your account is not active"
+                #return HttpResponse("Your account is not active.")
         else:
-            print("Someone tried to login and failed.")
-            print("They used username: {} and password: {}".format(username,password))
-            return HttpResponse("Invalid login details supplied.")
+            loginFailed=True
+            errorMessage="Invalid login,check your username and password!"
+
+    return render(request, 'accounts/login.html', {'loginFailed':loginFailed,
+                                                    'errorMessage':errorMessage})
+
+def edit_user_profile(request):
+    isUpdated = False
+    if request.method == 'POST':
+        edit_profile_form = EditProfileForm(data=request.POST,instance=request.user)
+
+        if edit_profile_form.is_valid():
+            edit_profile_form.save()
+            isUpdated = True
+
+        else:
+            print(edit_profile_form.errors)
 
     else:
-        return render(request, 'accounts/login.html', {})
+        edit_profile_form = EditProfileForm(instance=request.user)
+        #edit_profile_form.email=request.user
+
+    return render(request,'accounts/editProfil.html',
+                          {'edit_profile_form':edit_profile_form,
+                           'isUpdated':isUpdated})
