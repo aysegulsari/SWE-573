@@ -2,11 +2,22 @@
 {% load bootstrap3%}
 {% block content %}
 <div class="container">
-  <h1>Sign Up</h1>
-  <form  method="POST">
-    {% csrf_token %}
-    {% bootstrap_form form%}
-    <input type="submit" class="btn btn-primary" value="Sign Up">
-  </form>
+  <div class="jumbotron">
+    {% if registered %}
+      <h1>Thank you for registering!</h1>
+    {% else %}
+      <h1>Sign Up</h1>
+
+      <form enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        {{ user_form.as_p }}
+        {{ profile_form.as_p }}
+        <input type="submit" name="" value="Register">
+      </form>
+
+    {% endif %}
+
+  </div>
+
 </div>
 {% endblock %}

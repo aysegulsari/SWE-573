@@ -3,10 +3,17 @@
 {% block content %}
 <div class="container">
   <h1>Log In</h1>
-  <form  method="POST">
-    {% csrf_token %}
-    {% bootstrap_form form%}
-    <input type="submit" class="btn btn-primary" value="Login">
-  </form>
+    <form method="post" action="{% url 'accounts:user_login' %}">
+      {% csrf_token %}
+      {# A more "HTML" way of creating the login form#}
+      <label for="username">Username:</label>
+      <input type="text" name="username" placeholder="Username">
+
+      <label for="password"></label>
+      <input type="password" name="password">
+
+      <input type="submit" name="" value="Login">
+
+    </form>
 </div>
 {% endblock %}
