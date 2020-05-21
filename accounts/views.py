@@ -1,11 +1,14 @@
 from django.shortcuts import render
-from .forms import UserForm,UserProfileInfoForm,EditProfileForm
+from .forms import UserForm,UserProfileInfoForm,EditProfileForm,CreateRecipeForm
 from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
+from .models import Recipe
+import json
+from urllib.request import urlopen
 @login_required
 def user_logout(request):
     # Log out the user.
@@ -105,3 +108,54 @@ def change_password(request):
     return render(request,'accounts/changePassword.html',
                           {'change_password_form':change_password_form,
                            'isChanged':isChanged})
+
+def create_recipe(request):
+    title=""
+    description =""
+    instructions = ""
+    duration = ""
+    level= ""
+    ingredients = ""
+    error_Message=""
+    user_form=CreateRecipeForm(request.POST)
+
+    if request.method=='POST' and 'save' in request.POST:
+        if user_form.is_valid():
+            user=request.user
+            title=user_form.cleaned_data.get('title')
+            description = user_form.cleaned_data.get('description')
+            instructions = user_form.cleaned_data.get('instructions')
+            duration =  user_form.cleaned_data.get('duration')
+            level= user_form.cleaned_data.get('level')
+            ingredients =  user_form.cleaned_data.get('ingredients')
+            if ingredients is None:
+                error_Message="First select ingredients!"
+            else:
+                Recipe.objects.create(user=user,title=title,description=description,instructions=instructions,duration=duration,level=level,ingredients=ingredients)
+    else:
+        user_form=CreateRecipeForm()
+
+
+    return render(request,'accounts/create_recipe.html',
+                          {'user_form':user_form,
+                            'title':title,
+                            'description':description,
+                            'instructions':instructions,
+                            'duration':duration,
+                            'level':level,
+                            'ingredients': ingredients,
+                            'error_Message':error_Message
+                           })
+
+def search_ingredient(request):
+    if request.method=="GET":
+        search_term=request.GET.get('search_term',None)
+        api_key="hExa857fawOBmDsWG4ii7gpzUqBEDKJ2aGn0nzvx"
+        url="https://api.nal.usda.gov/fdc/v1/foods/search?api_key={}&query={}".format(api_key,"search_term")
+        serialized_data = urlopen(url).read()
+        data = json.loads(serialized_data)
+        isSearchOk=True
+        foods=data["foods"]
+        return JsonResponse({"foods":foods}, status=200)
+    else:
+        return JsonResponse({"success":False}, status=400)

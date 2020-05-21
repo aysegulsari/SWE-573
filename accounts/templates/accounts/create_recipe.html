@@ -1,0 +1,53 @@
+{% extends "base.html"%}
+{% load bootstrap3%}
+{% block content %}
+<div class="container">
+  <div class="jumbotron">
+    <form method='POST'>
+      {% csrf_token %}
+      {{user_form.as_p}}
+      <label>Search ingredients:<label>
+      <input id="term" placeholder="Search for ingredient" name='search'>
+       <button id="search" class="btn btn-outline-primary" type="submit" >Search</button>
+       <label>Search Results:<label>
+      <select name="dropdown" id="search_results">
+        {% for food in foods%}
+        <option value="{{ food.fdcId }}">{{ food.description }} , {{food.fdcId }}</option>
+        {% endfor %}
+      </select>
+
+</div>
+    </form>
+  </div>
+</div>
+<script>
+  $(document).ready(function(){
+			$("#search").click(function(e){
+				e.preventDefault();
+				var search_term = $("#term").val();
+				$.ajax({
+					type : 'GET',
+					url : "https://api.nal.usda.gov/fdc/v1/foods/search",
+					data :{ api_key:"hExa857fawOBmDsWG4ii7gpzUqBEDKJ2aGn0nzvx",
+                 query: search_term,
+                 csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+					success : function(response){
+              var len = response.length;
+              $("#search_results").empty();
+              for( var i = 0; i<50; i++)
+              {
+                var desc = response.foods[i]['description'];
+                var id = response.foods[i]['fdcId'];
+                var nutrients=response.foods[i]['foodNutrients'][0]['name'];
+                $("#search_results").append("<option id='"+id+"'>"+desc+nutrients+"</option>");
+              }
+            },
+            error : function(response){
+              console.log(response)
+            }
+				})
+			})
+		})
+</script>
+{% endblock %}
