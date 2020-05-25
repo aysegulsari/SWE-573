@@ -117,9 +117,13 @@ def create_recipe(request):
     level= ""
     ingredients = ""
     error_Message=""
-    user_form=CreateRecipeForm(request.POST)
 
-    if request.method=='POST' and 'save' in request.POST:
+    isOk="nothing happened"
+
+
+    if request.method=='POST':
+        isOk="reached"
+        user_form=CreateRecipeForm(request.POST)
         if user_form.is_valid():
             user=request.user
             title=user_form.cleaned_data.get('title')
@@ -127,14 +131,16 @@ def create_recipe(request):
             instructions = user_form.cleaned_data.get('instructions')
             duration =  user_form.cleaned_data.get('duration')
             level= user_form.cleaned_data.get('level')
-            ingredients =  user_form.cleaned_data.get('ingredients')
+            ingredients =   user_form.cleaned_data.get('ingredients')
             if ingredients is None:
                 error_Message="First select ingredients!"
+                isOk="no selecttion"
             else:
                 Recipe.objects.create(user=user,title=title,description=description,instructions=instructions,duration=duration,level=level,ingredients=ingredients)
+                isOk="save tried"
     else:
         user_form=CreateRecipeForm()
-
+        isOk="form loaded"
 
     return render(request,'accounts/create_recipe.html',
                           {'user_form':user_form,
@@ -144,7 +150,8 @@ def create_recipe(request):
                             'duration':duration,
                             'level':level,
                             'ingredients': ingredients,
-                            'error_Message':error_Message
+                            'error_Message':error_Message,
+                            'isOk':isOk,
                            })
 
 def search_ingredient(request):

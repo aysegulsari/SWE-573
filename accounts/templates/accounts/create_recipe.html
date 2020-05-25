@@ -1,25 +1,50 @@
 {% extends "base.html"%}
 {% load bootstrap3%}
+{% load widget_tweaks %}
 {% block content %}
 <div class="container">
   <div class="jumbotron">
     <form method='POST'>
       {% csrf_token %}
-      {{user_form.as_p}}
-      <label>Search ingredients:<label>
-      <input id="term" placeholder="Search for ingredient" name='search'>
-       <button id="search" class="btn btn-outline-primary" type="submit" >Search</button>
-       <label>Search Results:<label>
-      <select name="dropdown" id="search_results">
-        {% for food in foods%}
-        <option value="{{ food.fdcId }}">{{ food.description }} , {{food.fdcId }}</option>
-        {% endfor %}
-      </select>
-
-</div>
+      {{ user_form.non_field_errors }}
+      {% for field, obj in user_form.fields.items %}
+        <div class="form-group">
+          <label for="{{ field }}" class="col-form-label">{{ field }}</label>
+          <input id="{{ field }}" type="{{ obj.widget.input_type }}" class="form-control" name="{{ field }}">
+        </div>
+      {% endfor %}
+      <div>
+        <label>Search ingredients:<label>
+        <input id="term" placeholder="Search for ingredient" name='search'>
+        <button id="search" class="btn btn-outline-primary">Search</button>
+      </div>
+      <div >
+        <label>Search Results:<label>
+        <select name="dropdown" id="search_results"></select>
+        <select name="dropdown" id="amount"></select>
+        <select name="dropdown" id="unit" onchange="unitChangeFunction(this.value)">
+          <option value="gram">gram</option>
+          <option value="tspoon">tspoon</option>
+          <option value="ml">ml</option>
+          <option value="piece">piece</option>
+        </select>
+        <button id="add" class="btn btn-outline-primary">Add ingredient</button>
+      </div>
+      <div>
+        <label for="dropdown">Ingredients:</label>
+        <select name="dropdown" id="ingredients" ></select>
+        <button id="remove" class="btn btn-outline-primary">Remove ingredient</button>
+      </div>
+      <div class="form-group row text-right">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+          <input type="submit" class="btn btn-outline-primary" value="Save"></input>
+        </div>
+      </div>
+      {{isOk}}
     </form>
   </div>
 </div>
+
 <script>
   $(document).ready(function(){
 			$("#search").click(function(e){
@@ -39,8 +64,7 @@
               {
                 var desc = response.foods[i]['description'];
                 var id = response.foods[i]['fdcId'];
-                var nutrients=response.foods[i]['foodNutrients'][0]['name'];
-                $("#search_results").append("<option id='"+id+"'>"+desc+nutrients+"</option>");
+                $("#search_results").append("<option id='"+id+"'>"+desc+"</option>");
               }
             },
             error : function(response){
@@ -48,6 +72,66 @@
             }
 				})
 			})
-		})
+      $("#add").click(function(e){
+        e.preventDefault();
+        var search_term = $("#search_results").find('option:selected').attr("id");
+        $.ajax({
+          type : 'GET',
+          url : "https://api.nal.usda.gov/fdc/v1/food/"+search_term,
+          data :{ api_key:"hExa857fawOBmDsWG4ii7gpzUqBEDKJ2aGn0nzvx",
+                 csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+          success : function(response){
+            var desc = response['description'];
+            var id = response['fdcId'];
+            var amount = $("#amount").find('option:selected').val();
+            var unit = $("#unit").find('option:selected').val();
+
+            $('#ingredients').append("<option id='"+id+"'>"+desc+";"+amount+";"+unit+"</option>");
+          },
+          error : function(response){
+            console.log(response)
+          }
+        })
+      })
+      $("#remove").click(function(e){
+        e.preventDefault();
+        var remove_term = $("#ingredients").find('option:selected').val();
+        console.log(remove_term);
+        $('#ingredients option:selected').remove();
+      })
+      $(function(e){
+        if($("#unit").val()=="piece")
+        {
+          for (i=1;i<=50;i=i+0.5)
+          {
+            $("#amount").append("<option id='"+i+"'>"+i+"</option>");
+          }
+        }
+        else
+        {
+          for (i=1;i<=2000;i++)
+          {
+            $("#amount").append("<option id='"+i+"'>"+i+"</option>");
+          }
+        }
+      })
+	})
+  function unitChangeFunction(){
+    if($("#unit").val()=="piece")
+    {
+      for (i=1;i<=50;i=i+0.5)
+      {
+        $("#amount").append("<option id='"+i+"'>"+i+"</option>");
+      }
+    }
+    else
+    {
+      for (i=1;i<=2000;i++)
+      {
+        $("#amount").append("<option id='"+i+"'>"+i+"</option>");
+      }
+    }
+  }
 </script>
 {% endblock %}
