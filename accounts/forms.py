@@ -30,9 +30,6 @@ class EditProfileForm(forms.ModelForm):
         fields = ('username','first_name','last_name','email')
 
 class CreateRecipeForm(forms.ModelForm):
-    #level= forms.CharField(label='level', widget=forms.Select(choices=LEVEL_CHOICES))
-
-    #password = forms.CharField(widget=forms.PasswordInput())
     class Meta():
         model = Recipe
         fields = ('title','description','instructions','duration')

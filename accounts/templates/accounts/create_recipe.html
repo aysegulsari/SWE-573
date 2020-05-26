@@ -1,16 +1,18 @@
 {% extends "base.html"%}
 {% load bootstrap3%}
-{% load widget_tweaks %}
 {% block content %}
 <div class="container">
   <div class="jumbotron">
     <form method='POST'>
+      <h3>Create Recipe</h3>
       {% csrf_token %}
       {{ user_form.non_field_errors }}
       <div class="form-group">
       {% for field, obj in user_form.fields.items %}
-          <label for="{{ field }}" class="col-form-label">{{ field }}</label>
-          <input id="{{ field }}" type="{{ obj.widget.input_type }}" class="form-control" name="{{ field }}">
+      <div class="">
+        <label for="{{ field }}" >{{ field }}:</label>
+        <input id="{{ field }}" name="{{ field }}">
+      </div>
       {% endfor %}
       <label>level</label>
       <select name="level" id="level" >
@@ -24,7 +26,7 @@
         <input id="term" placeholder="Search for ingredient" name='search'>
         <button id="search" class="btn btn-outline-primary">Search</button>
       </div>
-      <div >
+      <div>
         <label>Search Results:<label>
         <select name="dropdown" id="search_results"></select>
         <select name="dropdown" id="amount"></select>
@@ -37,9 +39,9 @@
         <button id="add" class="btn btn-outline-primary">Add ingredient</button>
       </div>
       <div>
-        <label for="dropdown">Ingredients:</label>
-        <select name="dropdown" id="ingredients" ></select>
-        <button id="remove" class="btn btn-outline-primary">Remove ingredient</button>
+        <label>Ingredients:</label>
+        <ul id="ingList" name="ingList" ></ul>
+        <textarea id="hiddenIngList" name="hiddenIngList" rows="8" cols="80" style="display:none;"></textarea>
       </div>
       <div class="form-group row text-right">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
@@ -52,6 +54,7 @@
 </div>
 
 <script>
+  var dict = {};
   $(document).ready(function(){
 			$("#search").click(function(e){
 				e.preventDefault();
@@ -92,8 +95,9 @@
             var id = response['fdcId'];
             var amount = $("#amount").find('option:selected').val();
             var unit = $("#unit").find('option:selected').val();
-
-            $('#ingredients').append("<option id='"+id+"'>"+desc+";"+amount+";"+unit+"</option>");
+            var item=desc+";"+amount+" "+unit;
+            dict[item]=item;
+            addItemToList(item);
           },
           error : function(response){
             console.log(response)
@@ -122,6 +126,7 @@
           }
         }
       })
+
 	})
   function unitChangeFunction(){
     if($("#unit").val()=="piece")
@@ -138,6 +143,38 @@
         $("#amount").append("<option id='"+i+"'>"+i+"</option>");
       }
     }
+  }
+  function addItemToList(id) {
+    var $myList = $('#ingList');
+    var $deleteLink = $('<a href="#"> x</a>');
+    $deleteLink.on('click', function(e) {
+      e.preventDefault();
+      $(this).parent().remove();
+      dict.del($(this).val());
+      updateIngList();
+    })
+
+    var $entry = $('<li id="ingList" name="ingList">'+id+'</li>')
+    $entry.append($deleteLink)
+    $myList.append($entry);
+    updateIngList();
+  }
+  function updateIngList()
+  {
+    var temp="";
+
+    for (var key in dict)
+    {
+        // check if the property/key is defined in the object itself, not in parent
+        if (dict.hasOwnProperty(key)) {
+          if(temp=="")
+            temp= dict[key];
+          else
+            temp=temp+"*"+dict[key];
+
+        }
+    }
+    $('#hiddenIngList').val(temp);
   }
 </script>
 {% endblock %}

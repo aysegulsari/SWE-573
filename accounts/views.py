@@ -117,12 +117,8 @@ def create_recipe(request):
     level= ""
     ingredients = ""
     error_Message=""
-
-    isOk="nothing happened"
-
-
+    isOk=""
     if request.method=='POST':
-        isOk="reached"
         user_form=CreateRecipeForm(request.POST)
         if user_form.is_valid():
             user=request.user
@@ -131,16 +127,21 @@ def create_recipe(request):
             instructions = user_form.cleaned_data.get('instructions')
             duration =  user_form.cleaned_data.get('duration')
             level=request.POST.get('level')
-            ingredients =  "some ingredients" #user_form.cleaned_data.get('ingredients')
+            ingredients = request.POST.get('hiddenIngList')
+
+            #ingredients=""
+            #for ing in ingList:
+            #    ingredients+="ing"
+
             if ingredients is None:
                 error_Message="First select ingredients!"
-                isOk="no selecttion"
+                isOk="First select ingredients!"
             else:
                 Recipe.objects.create(user=user,title=title,description=description,instructions=instructions,duration=duration,level=level,ingredients=ingredients)
-                isOk="save tried"
+                isOk= "saved with "+ ingredients
     else:
         user_form=CreateRecipeForm()
-        isOk="form loaded"
+
 
     return render(request,'accounts/create_recipe.html',
                           {'user_form':user_form,
