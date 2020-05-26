@@ -7,12 +7,18 @@
     <form method='POST'>
       {% csrf_token %}
       {{ user_form.non_field_errors }}
+      <div class="form-group">
       {% for field, obj in user_form.fields.items %}
-        <div class="form-group">
           <label for="{{ field }}" class="col-form-label">{{ field }}</label>
           <input id="{{ field }}" type="{{ obj.widget.input_type }}" class="form-control" name="{{ field }}">
-        </div>
       {% endfor %}
+      <label>level</label>
+      <select name="level" id="level" >
+        <option value="easy">easy</option>
+        <option value="medium">medium</option>
+        <option value="hard">hard</option>
+    </select>
+    </div>
       <div>
         <label>Search ingredients:<label>
         <input id="term" placeholder="Search for ingredient" name='search'>

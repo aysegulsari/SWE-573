@@ -130,8 +130,8 @@ def create_recipe(request):
             description = user_form.cleaned_data.get('description')
             instructions = user_form.cleaned_data.get('instructions')
             duration =  user_form.cleaned_data.get('duration')
-            level= user_form.cleaned_data.get('level')
-            ingredients =   user_form.cleaned_data.get('ingredients')
+            level=request.POST.get('level')
+            ingredients =  "some ingredients" #user_form.cleaned_data.get('ingredients')
             if ingredients is None:
                 error_Message="First select ingredients!"
                 isOk="no selecttion"

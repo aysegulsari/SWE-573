@@ -2,6 +2,12 @@ from django import forms
 from django.contrib.auth.models import User
 from .models import UserProfileInfo,Recipe
 
+LEVEL_CHOICES= [
+    ('easy', 'easy'),
+    ('medium', 'medium'),
+    ('hard', 'hard'),
+    ]
+
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
     class Meta():
@@ -24,7 +30,9 @@ class EditProfileForm(forms.ModelForm):
         fields = ('username','first_name','last_name','email')
 
 class CreateRecipeForm(forms.ModelForm):
+    #level= forms.CharField(label='level', widget=forms.Select(choices=LEVEL_CHOICES))
+
     #password = forms.CharField(widget=forms.PasswordInput())
     class Meta():
         model = Recipe
-        fields = ('title','description','instructions','duration','level')
+        fields = ('title','description','instructions','duration')
