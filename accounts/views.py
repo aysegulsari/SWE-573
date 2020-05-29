@@ -9,6 +9,12 @@ from django.contrib.auth.forms import PasswordChangeForm
 from .models import Recipe
 import json
 from urllib.request import urlopen
+from django.views.generic import (View,TemplateView,
+                                ListView,DetailView,
+                                CreateView,DeleteView,
+                                UpdateView)
+
+
 @login_required
 def user_logout(request):
     # Log out the user.
@@ -167,3 +173,32 @@ def search_ingredient(request):
         return JsonResponse({"foods":foods}, status=200)
     else:
         return JsonResponse({"success":False}, status=400)
+
+
+class RecipeListView(ListView):
+
+    def get(self, request):
+        errorMessage=""
+        recipes=Recipe.objects.filter(user=request.user)
+        if recipes is None:
+            errorMessage="No recipe is created!"
+        return render(request,'accounts/list_recipes.html',
+                                  {'recipes':recipes,
+                                    'errorMessage':errorMessage,
+                                   })
+
+class RecipeDetailView(DetailView):
+
+    def get(self,request,**kwargs):
+        errorMessage=""
+        if request.method=="GET":
+            id = self.kwargs.get('pk')
+            errorMessage=id
+            recipe=Recipe.objects.get(pk=49)
+            if recipe is None:
+                errorMessage="No recipe is created!"
+
+        return render(request,'accounts/recipe_details.html',
+                          {'recipe':recipe,
+                           'errorMessage':errorMessage,
+                           })

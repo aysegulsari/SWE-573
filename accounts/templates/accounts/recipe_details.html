@@ -1,0 +1,23 @@
+{% extends "base.html"%}
+{% load bootstrap3%}
+{% block content %}
+<div class="container">
+  <div class="jumbotron">
+    <h2>Recipe Details:</h2>
+      <p>Recipe Title: {{recipe.title}}</p>
+      <p>Description: {{recipe.description}}</p>
+      <p>Instructions: {{recipe.instructions}}</p>
+      <p>Duration: {{recipe.duration}}</p>
+      <p>Level: {{recipe.level}}</p>
+      <p>Ingredients:</p>
+      <ul>
+        {% for ing in recipe.ingredients %}
+          <li>ing</li>
+        {% endfor %}
+      </ul>
+      <p>Nutrition values: to do: parse Nutrition values from ingredients</p>
+  </div>
+</div>
+
+
+{% endblock %}
