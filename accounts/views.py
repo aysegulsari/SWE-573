@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .forms import UserForm,UserProfileInfoForm,EditProfileForm,CreateRecipeForm
+from .forms import UserForm,UserProfileInfoForm,EditProfileForm,CreateRecipeForm,PasswordChangeCustomForm
 from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
@@ -23,24 +23,27 @@ def user_logout(request):
     return HttpResponseRedirect(reverse_lazy("login"))
 
 def register(request):
-    registered = False
+    registered=False
+    errorMessage=""
     if request.method == 'POST':
         user_form = UserForm(data=request.POST)
         profile_form = UserProfileInfoForm(data=request.POST)
 
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save()
-            user.set_password(user.password)
+            password=request.POST.get('password')
+            user.set_password(password)
             user.save()
 
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
-
-            registered = True
+            registered=True
+            errorMessage = "Registered"
 
         else:
             print(user_form.errors,profile_form.errors)
+            errorMessage="Not registered"
 
     else:
         user_form = UserForm()
@@ -48,8 +51,9 @@ def register(request):
 
     return render(request,'accounts/signup.html',
                           {'user_form':user_form,
-                           'profile_form':profile_form,
-                           'registered':registered})
+                          'profile_form':profile_form,
+                           'registered':registered,
+                           'error_Message':errorMessage})
 
 def user_login(request):
     loginFailed=False
@@ -98,7 +102,7 @@ def edit_user_profile(request):
 def change_password(request):
     isChanged = False
     if request.method == 'POST':
-        change_password_form = PasswordChangeForm(data=request.POST,user=request.user)
+        change_password_form = PasswordChangeCustomForm(data=request.POST,user=request.user)
 
         if change_password_form.is_valid():
             change_password_form.save()
@@ -108,7 +112,7 @@ def change_password(request):
             print(change_password_form.errors)
 
     else:
-        change_password_form = PasswordChangeForm(user=request.user)
+        change_password_form = PasswordChangeCustomForm(user=request.user)
         #edit_profile_form.email=request.user
 
     return render(request,'accounts/changePassword.html',
