@@ -7,17 +7,30 @@
         <form method="post" action="{% url 'accounts:user_login' %}">
           {% csrf_token %}
           {# A more "HTML" way of creating the login form#}
-          <label for="username">Username:</label>
-          <input type="text" name="username" placeholder="Username">
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroup-sizing-default">UserName</span>
+            </div>
+            <input type="text" class="form-control" placeholder="Username" aria-label="Default" required="required" aria-describedby="inputGroup-sizing-default" id="username" name="username">
+          </div>
 
-          <label for="password"></label>
-          <input type="password" name="password">
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroup-sizing-default">Password</span>
+            </div>
+            <input type="password" class="form-control" placeholder="Password" aria-label="Default" required="required" aria-describedby="inputGroup-sizing-default" id="password" name="password">
+          </div>
 
-          <input type="submit" name="" value="Login">
+         <div class="form-group row text-right">
+           <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+             <input type="submit" class="btn btn-outline-primary" value="Login"></input>
+           </div>
+         </div>
+
         </form>
           {% if not isLoggedIn %}
           <h6>{{errorMessage}}</h6>
           {% endif %}
-    </div>      
+    </div>
 </div>
 {% endblock %}
