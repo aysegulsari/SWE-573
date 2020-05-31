@@ -10,14 +10,27 @@
       <p>Duration: {{recipe.duration}}</p>
       <p>Level: {{recipe.level}}</p>
       <p>Ingredients: </p>
-      <ul>
-        {% for ing in recipe.ingredients %}
-          <li>ing</li>
-        {% endfor %}
-      </ul>
+      <ul id="ingList" name="ingList"> </ul>
       <p>Nutrition values: to do: parse Nutrition values from ingredients</p>
   </div>
 </div>
 
+<script>
+  var ingredients = {};
 
+  $(document).ready(function(){
+      $(function(e){
+        var ingredientsWithColon="{{recipe.ingredients}}"
+
+        var ingredientList = ingredientsWithColon.split("*");
+        var i;
+        var $myList = $('#ingList');
+
+        for (i=1;i<ingredientList.length;i=i+1){
+          var $entry = $('<li id="ingList" name="ingList">'+ingredientList[i]+'</li>')
+          $myList.append($entry);
+        }
+      })
+	})
+</script>
 {% endblock %}
