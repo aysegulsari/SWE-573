@@ -55,16 +55,21 @@
           <select class="form-control" id="search_results" onchange="getSelectedFoodItem(this.value)"></select>
           <select class="form-control" id="amount"></select>
           <select class="form-control" id="unit" onchange="unitChangeFunction(this.value)">
-            <option value="gram">gram</option>
-            <option value="ml">ml</option>
             <option value="teaspoon">teaspoon</option>
             <option value="tablespoon">tablespoon</option>
-            <option value="cup">cup</option>
+            <option value="tatlı kaşığı">tatlı kaşığı</option>
+            <option value="çay kaşığı">çay kaşığı</option>
+            <option value="yemek kaşığı">yemek kaşığı</option>
             <option value="oz">oz</option>
+            <option value="cup">cup</option>
+            <option value="su bardağı">su bardağı</option>
+            <option value="çay bardağı">çay bardağı</option>
+            <option value="ml">ml</option>
+            <option value="gram">gram</option>
           </select>
           <button id="add" class="btn btn-outline-primary">Add ingredient</button>
-          <p id="nutritientDetails"></p>
         </div>
+        <p id="nutritientDetails"></p>
         <div class="input-group mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text" id="inputGroup-sizing-default">Ingredients</span>
@@ -120,12 +125,17 @@
         e.preventDefault();
         if(jQuery.isEmptyObject(selectedFoodItem))
           return;
-        var item=selectedFoodItem['desc']+";"+selectedFoodItem['amount']+" "+selectedFoodItem['unit']+";";
+        var amount=  $("#amount").find('option:selected').val();
+        var unit=$("#unit").find('option:selected').val();
+        var item=selectedFoodItem['desc']+";"+amount+";"+unit+"_";//+  selectedFoodItem['nutrientItems']['nutrient'];
+        var gramValue=convertToGram(amount,unit);
+        var convertedNutritionalValues=convertNutritions(selectedFoodItem['nutrientItems']['nutrient'], gramValue);
+        item+=convertedNutritionalValues;
         dict[item]=item;
         addItemToList(item);
       })
       $(function(e){
-        if($("#unit").val()=="teaspoon" || $("#unit").val()=="tablespoon" || $("#unit").val()=="cup" || $("#unit").val()=="oz"){
+        if($("#unit").val()=="teaspoon" || $("#unit").val()=="tablespoon" || $("#unit").val()=="cup" ||$("#unit").val()=="oz" || $("#unit").val()=="su bardağı" || $("#unit").val()=="çay bardağı" ){
           $("#amount").append("<option id='1/4'>"+1/4+"</option>");
           $("#amount").append("<option id='1/2'>"+1/2+"</option>");
           $("#amount").append("<option id='3/4'>"+3/4+"</option>");
@@ -177,7 +187,7 @@
           selectedFoodItem['amount'] = $("#amount").find('option:selected').val();
           selectedFoodItem['unit'] = $("#unit").find('option:selected').val();
           var nutritientDetails = document.getElementById('nutritientDetails')
-          nutritientDetails.innerHTML="Nutrient details of selected food: "+nutrientItems['nutrient'];
+          nutritientDetails.innerHTML="Nutrient details of selected food(for 100 gram): "+nutrientItems['nutrient'];
         },
         error : function(response){
           console.log(response)
@@ -187,7 +197,7 @@
   }
   function unitChangeFunction(){
     $("#amount").empty();
-    if($("#unit").val()=="teaspoon" || $("#unit").val()=="tablespoon" || $("#unit").val()=="cup" ||$("#unit").val()=="oz"){
+    if($("#unit").val()=="teaspoon" || $("#unit").val()=="tablespoon" || $("#unit").val()=="cup" ||$("#unit").val()=="oz" || $("#unit").val()=="su bardağı" || $("#unit").val()=="çay bardağı" ){
       $("#amount").append("<option id='1/4'>"+1/4+"</option>");
       $("#amount").append("<option id='1/2'>"+1/2+"</option>");
       $("#amount").append("<option id='3/4'>"+3/4+"</option>");
@@ -237,6 +247,53 @@
           return true;
     }
     return false;
+  }
+  function convertToGram(amount,unit){
+    if(unit=="teaspoon")
+      return amount*227/48;
+    if(unit=="tablespoon")
+      return amount*227/16 ;
+    if(unit=="tatlı kaşığı")
+      return amount*227/48 ;
+    if(unit=="çay kaşığı")
+      return amount*227/96 ;
+    if(unit=="yemek kaşığı")
+      return amount*227/16 ;
+    if(unit=="oz")
+      return amount*227/8 ;
+    if(unit=="cup")
+      return amount*227;
+    if(unit=="su bardağı")
+      return amount*227;
+    if(unit=="çay bardağı")
+      return amount*227/2;
+    if(unit=="ml")
+      return amount*227/237;
+    return amount;
+  }
+  function convertNutritions(nutrients,gramValue){
+    var multiplier=gramValue/100;
+    var listNutrients=nutrients.split(";");
+    var newListNutrients="";
+    var i;
+    for(i=0;i<listNutrients.length;i=i+1){
+      var nutrients=listNutrients[i].split(" ");
+      var nutrientName="";
+      var j;
+      for(j=0;j<nutrients.length-2;j=j+1){
+        if(j==0)
+          nutrientName=nutrients[j];
+        else
+          nutrientName+=nutrients[j];
+      }
+      var amount=  nutrients[nutrients.length-2]*multiplier;
+      if(newListNutrients=="")
+        newListNutrients=nutrientName+" "+amount+" "+nutrients[nutrients.length-1]+"; ";
+      else
+        newListNutrients+=nutrientName+" "+amount+" "+nutrients[nutrients.length-1]+"; ";
+
+    }
+    return newListNutrients;
   }
 </script>
 {% endblock %}
