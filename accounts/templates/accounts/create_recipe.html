@@ -70,6 +70,7 @@
           <button id="add" class="btn btn-outline-primary">Add ingredient</button>
         </div>
         <p id="nutritientDetails"></p>
+        <p id="hintForUnits"></p>
         <div class="input-group mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text" id="inputGroup-sizing-default">Ingredients</span>
@@ -96,6 +97,11 @@
 			$("#search").click(function(e){
 				e.preventDefault();
 				var search_term = $("#term").val();
+        var nutritientDetails = document.getElementById('hintForUnits')
+        nutritientDetails.innerHTML="";
+        var nutritientDetails = document.getElementById('nutritientDetails')
+        nutritientDetails.innerHTML="";
+
 				$.ajax({
 					type : 'GET',
 					url : "https://api.nal.usda.gov/fdc/v1/foods/search",
@@ -186,6 +192,25 @@
           selectedFoodItem['nutrientItems']=nutrientItems;
           selectedFoodItem['amount'] = $("#amount").find('option:selected').val();
           selectedFoodItem['unit'] = $("#unit").find('option:selected').val();
+          if(response['foodPortions']!==null){
+            var hintPortionDesc=response['foodPortions'][0]['portionDescription'];
+            var hintGramWeight=response['foodPortions'][0]['gramWeight'];
+            var hintAmount=response['foodPortions'][0]['amount'];
+            var hintMeasureUnit=response['foodPortions'][0]['measureUnit']['name'];
+            var hint="";
+            if(hintPortionDesc!=undefined)
+              hint="     portion description: "+hintPortionDesc+ "</br>";
+            if(hintAmount!=undefined)
+              hint+="     amount: "+hintAmount + "</br>";
+            if(hintMeasureUnit!=undefined)
+                  hint+="     measure unit: "+hintMeasureUnit+ "</br>";
+            if(hintGramWeight!=undefined)
+              hint+="     gram weight: "+hintGramWeight+ "</br>";
+
+            var nutritientDetails = document.getElementById('hintForUnits')
+            if(hint!=="")
+              nutritientDetails.innerHTML="Suggested amount "+"</br>"+hint;
+          }
           var nutritientDetails = document.getElementById('nutritientDetails')
           nutritientDetails.innerHTML="Nutrient details of selected food(for 100 gram): "+nutrientItems['nutrient'];
         },
