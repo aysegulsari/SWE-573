@@ -149,6 +149,7 @@ def create_recipe(request):
             else:
                 Recipe.objects.create(user=user,title=title,description=description,instructions=instructions,duration=duration,level=level,ingredients=ingredients)
                 isOk= "saved with "+ ingredients
+                return HttpResponseRedirect(reverse_lazy("accounts:list_recipes"))
     else:
         user_form=CreateRecipeForm()
 
@@ -189,16 +190,16 @@ class RecipeListView(ListView):
         return render(request,'accounts/list_recipes.html',
                                   {'recipes':recipes,
                                     'errorMessage':errorMessage,
+                                    'username':request.user,
                                    })
 
 class RecipeDetailView(DetailView):
-
     def get(self,request,**kwargs):
         errorMessage=""
         if request.method=="GET":
             id = self.kwargs.get('pk')
             errorMessage=id
-            recipe=Recipe.objects.get(pk=49)
+            recipe=Recipe.objects.get(pk=id)
             if recipe is None:
                 errorMessage="No recipe is created!"
 

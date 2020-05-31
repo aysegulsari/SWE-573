@@ -7,77 +7,76 @@
       <h3>Create Recipe</h3>
       {% csrf_token %}
       <div class="form-group">
-
         <div class="input-group mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text"   id="inputGroup-sizing-default">Title</span>
           </div>
-          <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="title" name="title">
+          <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="title" name="title" required>
         </div>
         <div class="input-group mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text"   id="inputGroup-sizing-default">Description</span>
           </div>
-          <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="description" name="description">
+          <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="description" name="description" required>
         </div>
         <div class="input-group mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text"   id="inputGroup-sizing-default">Instructions</span>
           </div>
-          <textarea rows="8" cols="80"  class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="instructions" name="instructions"> </textarea>
+          <textarea rows="8" cols="80"  class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="instructions" name="instructions" required> </textarea>
         </div>
         <div class="input-group mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text"   id="inputGroup-sizing-default">Duration</span>
           </div>
-          <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="duration" name="duration">
+          <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="duration" name="duration" required>
         </div>
-      <div class="input-group mb-3">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="inputGroup-sizing-default">level</span>
-        </div>
-        <select class="form-control" id="level" name="level">
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">level</span>
+          </div>
+        <select class="form-control" id="level" name="level" required>
           <option value="easy">easy</option>
           <option value="medium">medium</option>
           <option value="hard">hard</option>
         </select>
-      </div>
-      <div class="input-group mb-3">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="inputGroup-sizing-default">search ingredients</span>
-          <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="term" placeholder="Search for ingredient" name='search'">
-          <button id="search" class="btn btn-outline-primary">Search</button>
         </div>
-      </div>
-      <div class="input-group mb-3">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="inputGroup-sizing-default">search results</span>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Search ingredients</span>
+            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="term" placeholder="Search for ingredient" name='search'">
+            <button id="search" class="btn btn-outline-primary">Search</button>
+          </div>
         </div>
-        <select class="form-control" id="search_results"></select>
-        <select class="form-control" id="amount"></select>
-        <select class="form-control" id="unit" onchange="unitChangeFunction(this.value)">
-          <option value="gram">gram</option>
-          <option value="tspoon">tspoon</option>
-          <option value="ml">ml</option>
-          <option value="piece">piece</option>
-        </select>
-        <button id="add" class="btn btn-outline-primary">Add ingredient</button>
-      </div>
-
-
-      <div class="input-group mb-3">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="inputGroup-sizing-default">Ingredients</span>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Search results</span>
+          </div>
+          <select class="form-control" id="search_results" onchange="getSelectedFoodItem(this.value)"></select>
+          <select class="form-control" id="amount"></select>
+          <select class="form-control" id="unit" onchange="unitChangeFunction(this.value)">
+            <option value="gram">gram</option>
+            <option value="ml">ml</option>
+            <option value="teaspoon">teaspoon</option>
+            <option value="tablespoon">tablespoon</option>
+            <option value="cup">cup</option>
+            <option value="oz">oz</option>
+          </select>
+          <button id="add" class="btn btn-outline-primary">Add ingredient</button>
+          <p id="nutritientDetails"></p>
         </div>
-        <ul id="ingList" name="ingList" ></ul>
-        <textarea id="hiddenIngList" name="hiddenIngList" style="display:none;"></textarea>
-      </div>  
-      <div class="form-group row text-right">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-          <input type="submit" class="btn btn-outline-primary" value="Save"></input>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Ingredients</span>
+          </div>
+          <ul id="ingList" name="ingList" ></ul>
+          <textarea id="hiddenIngList" name="hiddenIngList" style="display:none;"></textarea>
         </div>
-      </div>
-      {{isOk}}
+        <div class="form-group row text-right">
+          <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+            <input type="submit" class="btn btn-outline-primary" value="Save"></input>
+          </div>
+        </div>
       </div>
     </form>
   </div>
@@ -85,6 +84,9 @@
 
 <script>
   var dict = {};
+  var selectedFoodItem={};
+  var keywords=['Energy','Protein','fat','Carbohydrate','Calcium','Iron','Magnesium', 'B-12','B-6',
+  'Phosphorus','Potassium', 'Vitamin A','Vitamin D']
   $(document).ready(function(){
 			$("#search").click(function(e){
 				e.preventDefault();
@@ -94,16 +96,19 @@
 					url : "https://api.nal.usda.gov/fdc/v1/foods/search",
 					data :{ api_key:"hExa857fawOBmDsWG4ii7gpzUqBEDKJ2aGn0nzvx",
                  query: search_term,
-                 csrfmiddlewaretoken: '{{ csrf_token }}'
+                 csrfmiddlewaretoken: '{{ csrf_token }}',
+                 dataType:'Foundation'
                 },
 					success : function(response){
-              var len = response.length;
+              var len = response.foods.length;
               $("#search_results").empty();
-              for( var i = 0; i<50; i++)
-              {
-                var desc = response.foods[i]['description'];
-                var id = response.foods[i]['fdcId'];
-                $("#search_results").append("<option id='"+id+"'>"+desc+"</option>");
+              if(len !==null){
+                $("#search_results").append("<option id='"+-1+"'>Select ingredient...</option>" );
+                for( var i = 0; i<len; i++){
+                  var desc = response.foods[i]['description'];
+                  var id = response.foods[i]['fdcId'];
+                  $("#search_results").append("<option id='"+id+"'>"+desc+"</option>");
+                }
               }
             },
             error : function(response){
@@ -113,87 +118,97 @@
 			})
       $("#add").click(function(e){
         e.preventDefault();
-        var search_term = $("#search_results").find('option:selected').attr("id");
-        $.ajax({
-          type : 'GET',
-          url : "https://api.nal.usda.gov/fdc/v1/food/"+search_term,
-          data :{ api_key:"hExa857fawOBmDsWG4ii7gpzUqBEDKJ2aGn0nzvx",
-                 csrfmiddlewaretoken: '{{ csrf_token }}',
-                },
-          success : function(response){
-            var desc = response['description'];
-            var id = response['fdcId'];
-            var nutrientList=response['foodNutrients'];
-            var nutrients="";
-            if (nutrientList!==null){
-              var i;
-              for(i=0;i<nutrientList.length;i++){
-                if(i==0){
-                  nutrients=nutrientList[i]['nutrient']['name']+"_"+nutrientList[i]['amount'];
-                }
-                else{
-                  nutrients+="*"+nutrientList[i]['nutrient']['name']+"_"+nutrientList[i]['amount'];
-                }
-              }
-            }
-            var amount = $("#amount").find('option:selected').val();
-            var unit = $("#unit").find('option:selected').val();
-            var item=desc+";"+amount+" "+unit+";"+nutrients;
-            dict[item]=item;
-            addItemToList(item);
-          },
-          error : function(response){
-            console.log(response)
-          }
-        })
-      })
-      $("#remove").click(function(e){
-        e.preventDefault();
-        var remove_term = $("#ingredients").find('option:selected').val();
-        console.log(remove_term);
-        $('#ingredients option:selected').remove();
+        if(jQuery.isEmptyObject(selectedFoodItem))
+          return;
+        var item=selectedFoodItem['desc']+";"+selectedFoodItem['amount']+" "+selectedFoodItem['unit']+";";
+        dict[item]=item;
+        addItemToList(item);
       })
       $(function(e){
-        if($("#unit").val()=="piece")
-        {
-          for (i=1;i<=50;i=i+0.5)
-          {
+        if($("#unit").val()=="teaspoon" || $("#unit").val()=="tablespoon" || $("#unit").val()=="cup" || $("#unit").val()=="oz"){
+          $("#amount").append("<option id='1/4'>"+1/4+"</option>");
+          $("#amount").append("<option id='1/2'>"+1/2+"</option>");
+          $("#amount").append("<option id='3/4'>"+3/4+"</option>");
+          for (i=1;i<=100;i=i+0.25){
             $("#amount").append("<option id='"+i+"'>"+i+"</option>");
           }
         }
-        else
-        {
-          for (i=1;i<=2000;i++)
-          {
+        else{
+          for (i=1;i<=2000;i++){
             $("#amount").append("<option id='"+i+"'>"+i+"</option>");
           }
         }
       })
-
 	})
+  function getSelectedFoodItem(){
+    selectedFoodItem={};
+    var search_term = $("#search_results").find('option:selected').attr("id");
+    if(search_term!==null){
+      $.ajax({
+        type : 'GET',
+        url : "https://api.nal.usda.gov/fdc/v1/food/"+search_term,
+        data :{ api_key:"hExa857fawOBmDsWG4ii7gpzUqBEDKJ2aGn0nzvx",
+               csrfmiddlewaretoken: '{{ csrf_token }}',
+              },
+        success : function(response){
+          selectedFoodItem['desc'] = response['description'];
+          selectedFoodItem['id'] = response['fdcId'];
+          nutrientList=response['foodNutrients'];
+          if (nutrientList!==null){
+            nutrientItems={}
+            var i;
+            for(i=0;i<nutrientList.length;i++){
+
+                var nutrientName=nutrientList[i]['nutrient']['name'];
+                var nutrientIsOk=checknutrientIsOk(nutrientName);
+                if(nutrientIsOk==true){
+                  var amount=nutrientList[i]['amount'];
+                  var unit=nutrientList[i]['nutrient']['unitName']
+                  if(nutrientName!==undefined && amount!==undefined && unit!==undefined){
+                    if(nutrientItems['nutrient']==undefined)
+                      nutrientItems['nutrient']=nutrientName+' '+amount+' '+unit+'; ';
+                    else
+                      nutrientItems['nutrient']+=nutrientName+' '+amount+' '+unit+'; ';
+                  }
+                }
+              }
+          }
+          selectedFoodItem['nutrientItems']=nutrientItems;
+          selectedFoodItem['amount'] = $("#amount").find('option:selected').val();
+          selectedFoodItem['unit'] = $("#unit").find('option:selected').val();
+          var nutritientDetails = document.getElementById('nutritientDetails')
+          nutritientDetails.innerHTML="Nutrient details of selected food: "+nutrientItems['nutrient'];
+        },
+        error : function(response){
+          console.log(response)
+        }
+      })
+    }
+  }
   function unitChangeFunction(){
-    if($("#unit").val()=="piece")
-    {
-      for (i=1;i<=50;i=i+0.5)
-      {
+    $("#amount").empty();
+    if($("#unit").val()=="teaspoon" || $("#unit").val()=="tablespoon" || $("#unit").val()=="cup" ||$("#unit").val()=="oz"){
+      $("#amount").append("<option id='1/4'>"+1/4+"</option>");
+      $("#amount").append("<option id='1/2'>"+1/2+"</option>");
+      $("#amount").append("<option id='3/4'>"+3/4+"</option>");
+      for (i=1;i<=100;i=i+0.25){
         $("#amount").append("<option id='"+i+"'>"+i+"</option>");
       }
     }
-    else
-    {
-      for (i=1;i<=2000;i++)
-      {
+    else{
+      for (i=1;i<=2000;i++){
         $("#amount").append("<option id='"+i+"'>"+i+"</option>");
       }
     }
   }
   function addItemToList(id) {
     var $myList = $('#ingList');
-    var $deleteLink = $('<a href="#"> x</a>');
+    var $deleteLink = $('<a href="#" id="'+id+'"> x</a>');
     $deleteLink.on('click', function(e) {
       e.preventDefault();
+      var deleteValue=$(this)[0].id;
+      delete dict[deleteValue];
       $(this).parent().remove();
-      dict.del($(this).val());
       updateIngList();
     })
 
@@ -202,22 +217,26 @@
     $myList.append($entry);
     updateIngList();
   }
-  function updateIngList()
-  {
+  function updateIngList(){
     var temp="";
-
-    for (var key in dict)
-    {
-        // check if the property/key is defined in the object itself, not in parent
-        if (dict.hasOwnProperty(key)) {
+    for (var key in dict){
+        if (dict.hasOwnProperty(key)){
           if(temp=="")
             temp= dict[key];
           else
             temp=temp+"*"+dict[key];
-
         }
     }
     $('#hiddenIngList').val(temp);
+  }
+  function checknutrientIsOk(nutrientName){
+    var i;
+    for (i=0;i<keywords.length;i++){
+      var str=keywords[i];
+        if ( nutrientName.includes(str))
+          return true;
+    }
+    return false;
   }
 </script>
 {% endblock %}
