@@ -133,10 +133,10 @@
           return;
         var amount=  $("#amount").find('option:selected').val();
         var unit=$("#unit").find('option:selected').val();
-        var item=selectedFoodItem['desc']+";"+amount+";"+unit+"_";//+  selectedFoodItem['nutrientItems']['nutrient'];
+        var item=selectedFoodItem['desc']+";"+amount+";"+unit;//+  selectedFoodItem['nutrientItems']['nutrient'];
         var gramValue=convertToGram(amount,unit);
         var convertedNutritionalValues=convertNutritions(selectedFoodItem['nutrientItems']['nutrient'], gramValue);
-        var itemWithNutrients=item+convertedNutritionalValues;
+        var itemWithNutrients=item+"_"+convertedNutritionalValues;
         dict[item]=itemWithNutrients;
         //addItemToList(item);
         addItemToList(item);

@@ -37,3 +37,8 @@ class PasswordChangeCustomForm(PasswordChangeForm):
         super(PasswordChangeCustomForm, self).__init__(user,*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
+
+class UpdateRecipeForm(forms.ModelForm):
+    class Meta():
+        model = Recipe
+        fields = ('title','description','instructions','duration')

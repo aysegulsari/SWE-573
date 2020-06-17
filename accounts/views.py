@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .forms import UserForm,UserProfileInfoForm,EditProfileForm,CreateRecipeForm,PasswordChangeCustomForm
+from .forms import UserForm,UserProfileInfoForm,EditProfileForm,CreateRecipeForm,PasswordChangeCustomForm,UpdateRecipeForm
 from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
@@ -152,6 +152,8 @@ def create_recipe(request):
                 return HttpResponseRedirect(reverse_lazy("accounts:list_recipes"))
     else:
         user_form=CreateRecipeForm()
+        if user_form.is_valid():
+            Recipe.objects.create(user=user,title=title,description=description,instructions=instructions,duration=duration,level=level,ingredients=ingredients)
 
 
     return render(request,'accounts/create_recipe.html',
@@ -198,12 +200,31 @@ class RecipeDetailView(DetailView):
         errorMessage=""
         if request.method=="GET":
             id = self.kwargs.get('pk')
-            errorMessage=id
             recipe=Recipe.objects.get(pk=id)
             if recipe is None:
                 errorMessage="No recipe is created!"
-
         return render(request,'accounts/recipe_details.html',
+                          {'recipe':recipe,
+                           'errorMessage':errorMessage,
+                           })
+    def post(self,request,**kwargs):
+        errorMessage=""
+        user_form=UpdateRecipeForm(request.POST)
+        if request.method=="POST":
+            id = self.kwargs.get('pk')
+            recipe=Recipe.objects.get(pk=id)
+            if user_form.is_valid():
+                recipe.title=user_form.cleaned_data.get('title')
+                recipe.description = user_form.cleaned_data.get('description')
+                recipe.instructions = user_form.cleaned_data.get('instructions')
+                recipe.duration =  user_form.cleaned_data.get('duration')
+                recipe.level=request.POST.get('level')
+                recipe.ingredients = request.POST.get('hiddenIngList')
+                if recipe.ingredients is None:
+                    error_Message="First select ingredients!"
+                else:
+                    recipe.save()
+            return render(request,'accounts/recipe_details.html',
                           {'recipe':recipe,
                            'errorMessage':errorMessage,
                            })

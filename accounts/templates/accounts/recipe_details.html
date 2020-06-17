@@ -3,21 +3,97 @@
 {% block content %}
 <div class="container">
   <div class="jumbotron">
-    <h2>Recipe Details</h2>
-      <p>Recipe Title: {{recipe.title}}</p>
-      <p>Description: {{recipe.description}}</p>
-      <p>Instructions: {{recipe.instructions}}</p>
-      <p>Duration: {{recipe.duration}}</p>
-      <p>Level: {{recipe.level}}</p>
+    <form method='POST'>
+      {% csrf_token %}
+      <h2>Recipe Details</h2>
+      <div class="form-group">
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text"   id="inputGroup-sizing-default">Title</span>
+          </div>
+          <input type="text" value={{recipe.title}} class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="title" name="title" required>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text"   id="inputGroup-sizing-default">Description</span>
+          </div>
+          <input type="text" value={{recipe.description}} class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="description" name="description" required>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text"   id="inputGroup-sizing-default">Instructions</span>
+          </div>
+          <textarea rows="8" cols="80" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="instructions" name="instructions" required>{{recipe.instructions}}</textarea>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text"  id="inputGroup-sizing-default">Duration</span>
+          </div>
+          <input type="text" value={{recipe.duration}} class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="duration" name="duration" required>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" value={{recipe.level}} id="inputGroup-sizing-default">level</span>
+          </div>
+        <select class="form-control" id="level" name="level" required>
+          <option value="easy">easy</option>
+          <option value="medium">medium</option>
+          <option value="hard">hard</option>
+        </select>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Search ingredients</span>
+            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="term" placeholder="Search for ingredient" name='search'">
+            <button id="search" class="btn btn-outline-primary">Search</button>
+          </div>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Search results</span>
+          </div>
+          <select class="form-control" id="search_results" onchange="getSelectedFoodItem(this.value)"></select>
+          <select class="form-control" id="amount"></select>
+          <select class="form-control" id="unit" onchange="unitChangeFunction(this.value)">
+            <option value="teaspoon">teaspoon</option>
+            <option value="tablespoon">tablespoon</option>
+            <option value="tatlı kaşığı">tatlı kaşığı</option>
+            <option value="çay kaşığı">çay kaşığı</option>
+            <option value="yemek kaşığı">yemek kaşığı</option>
+            <option value="oz">oz</option>
+            <option value="cup">cup</option>
+            <option value="su bardağı">su bardağı</option>
+            <option value="çay bardağı">çay bardağı</option>
+            <option value="ml">ml</option>
+            <option value="gram">gram</option>
+          </select>
+          <button id="add" class="btn btn-outline-primary">Add ingredient</button>
+        </div>
+        <p id="nutritientDetails"></p>
+        <p id="hintForUnits"></p>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Ingredients</span>
+          </div>
+          <ul id="ingList" name="ingList" ></ul>
+          <textarea id="hiddenIngList" name="hiddenIngList" style="display:none;"></textarea>
+        </div>
+
       <p>Ingredients: </p>
       <ul id="ingList" name="ingList"> </ul>
+      {{errorMessage}}
       <p>Nutrition values: to do: parse Nutrition values from ingredients</p>
+      <div class="form-group row text-right">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+          <input type="submit" class="btn btn-outline-primary" value="Update"></input>
+        </div>
+      </div>
+        </form>
   </div>
 </div>
 
 <script>
   var ingredients = {};
-
   $(document).ready(function(){
       $(function(e){
         var ingredientsWithColon="{{recipe.ingredients}}"
@@ -27,10 +103,248 @@
         var $myList = $('#ingList');
 
         for (i=0;i<ingredientList.length;i=i+1){
-          var $entry = $('<li id="ingList" name="ingList">'+ingredientList[i]+'</li>')
-          $myList.append($entry);
+          var item=ingredientList[i]
+          if(item=="")
+            continue;
+          var ingredientWithoutNutrition=ingredientList[i].split("_");
+
+          dict[ingredientWithoutNutrition[0]]=item;
+          addItemToList(ingredientWithoutNutrition[0])
         }
       })
 	})
+
+  var dict = {};
+  var selectedFoodItem={};
+  var keywords=['Energy','Protein','fat','Carbohydrate','Calcium','Iron','Magnesium', 'B-12','B-6',
+  'Phosphorus','Potassium', 'Vitamin A','Vitamin D']
+  $(document).ready(function(){
+			$("#search").click(function(e){
+				e.preventDefault();
+				var search_term = $("#term").val();
+        var nutritientDetails = document.getElementById('hintForUnits')
+        nutritientDetails.innerHTML="";
+        var nutritientDetails = document.getElementById('nutritientDetails')
+        nutritientDetails.innerHTML="";
+
+				$.ajax({
+					type : 'GET',
+					url : "https://api.nal.usda.gov/fdc/v1/foods/search",
+					data :{ api_key:"hExa857fawOBmDsWG4ii7gpzUqBEDKJ2aGn0nzvx",
+                 query: search_term,
+                 csrfmiddlewaretoken: '{{ csrf_token }}',
+                 dataType:'Foundation'
+                },
+					success : function(response){
+              var len = response.foods.length;
+              $("#search_results").empty();
+              if(len !==null){
+                $("#search_results").append("<option id='"+-1+"'>Select ingredient...</option>" );
+                for( var i = 0; i<len; i++){
+                  var desc = response.foods[i]['description'];
+                  var id = response.foods[i]['fdcId'];
+                  $("#search_results").append("<option id='"+id+"'>"+desc+"</option>");
+                }
+              }
+            },
+            error : function(response){
+              console.log(response)
+            }
+				})
+			})
+      $("#add").click(function(e){
+        e.preventDefault();
+        if(jQuery.isEmptyObject(selectedFoodItem))
+          return;
+        var amount=  $("#amount").find('option:selected').val();
+        var unit=$("#unit").find('option:selected').val();
+        var item=selectedFoodItem['desc']+";"+amount+";"+unit;//+  selectedFoodItem['nutrientItems']['nutrient'];
+        var gramValue=convertToGram(amount,unit);
+        var convertedNutritionalValues=convertNutritions(selectedFoodItem['nutrientItems']['nutrient'], gramValue);
+        var itemWithNutrients=item+"_"+convertedNutritionalValues;
+        dict[item]=itemWithNutrients;
+        //addItemToList(item);
+        addItemToList(item);
+      })
+      $(function(e){
+        if($("#unit").val()=="teaspoon" || $("#unit").val()=="tablespoon" || $("#unit").val()=="cup" ||$("#unit").val()=="oz" || $("#unit").val()=="su bardağı" || $("#unit").val()=="çay bardağı" ){
+          $("#amount").append("<option id='1/4'>"+1/4+"</option>");
+          $("#amount").append("<option id='1/2'>"+1/2+"</option>");
+          $("#amount").append("<option id='3/4'>"+3/4+"</option>");
+          for (i=1;i<=100;i=i+0.25){
+            $("#amount").append("<option id='"+i+"'>"+i+"</option>");
+          }
+        }
+        else{
+          for (i=1;i<=2000;i++){
+            $("#amount").append("<option id='"+i+"'>"+i+"</option>");
+          }
+        }
+      })
+	})
+  function getSelectedFoodItem(){
+    selectedFoodItem={};
+    var search_term = $("#search_results").find('option:selected').attr("id");
+    if(search_term!==null){
+      $.ajax({
+        type : 'GET',
+        url : "https://api.nal.usda.gov/fdc/v1/food/"+search_term,
+        data :{ api_key:"hExa857fawOBmDsWG4ii7gpzUqBEDKJ2aGn0nzvx",
+               csrfmiddlewaretoken: '{{ csrf_token }}',
+              },
+        success : function(response){
+          selectedFoodItem['desc'] = response['description'];
+          selectedFoodItem['id'] = response['fdcId'];
+          nutrientList=response['foodNutrients'];
+          if (nutrientList!==null){
+            nutrientItems={}
+            var i;
+            for(i=0;i<nutrientList.length;i++){
+
+                var nutrientName=nutrientList[i]['nutrient']['name'];
+                var nutrientIsOk=checknutrientIsOk(nutrientName);
+                if(nutrientIsOk==true){
+                  var amount=nutrientList[i]['amount'];
+                  var unit=nutrientList[i]['nutrient']['unitName']
+                  if(nutrientName!==undefined && amount!==undefined && unit!==undefined){
+                    if(nutrientItems['nutrient']==undefined)
+                      nutrientItems['nutrient']=nutrientName+' '+amount+' '+unit+'; ';
+                    else
+                      nutrientItems['nutrient']+=nutrientName+' '+amount+' '+unit+'; ';
+                  }
+                }
+              }
+          }
+          selectedFoodItem['nutrientItems']=nutrientItems;
+          selectedFoodItem['amount'] = $("#amount").find('option:selected').val();
+          selectedFoodItem['unit'] = $("#unit").find('option:selected').val();
+          if(response['foodPortions']!==null && response['foodPortions'].length>0 ){
+            var hintPortionDesc=response['foodPortions'][0]['portionDescription'];
+            var hintGramWeight=response['foodPortions'][0]['gramWeight'];
+            var hintAmount=response['foodPortions'][0]['amount'];
+            var hintMeasureUnit=response['foodPortions'][0]['measureUnit']['name'];
+            var hint="";
+            if(hintPortionDesc!=undefined)
+              hint="     portion description: "+hintPortionDesc+ "</br>";
+            if(hintAmount!=undefined)
+              hint+="     amount: "+hintAmount + "</br>";
+            if(hintMeasureUnit!=undefined)
+                  hint+="     measure unit: "+hintMeasureUnit+ "</br>";
+            if(hintGramWeight!=undefined)
+              hint+="     gram weight: "+hintGramWeight+ "</br>";
+
+            var nutritientDetails = document.getElementById('hintForUnits')
+            if(hint!=="")
+              nutritientDetails.innerHTML="Suggested amount "+"</br>"+hint;
+          }
+          var nutritientDetails = document.getElementById('nutritientDetails')
+          nutritientDetails.innerHTML="Nutrient details of selected food(for 100 gram): "+nutrientItems['nutrient'];
+        },
+        error : function(response){
+          console.log(response)
+        }
+      })
+    }
+  }
+  function unitChangeFunction(){
+    $("#amount").empty();
+    if($("#unit").val()=="teaspoon" || $("#unit").val()=="tablespoon" || $("#unit").val()=="cup" ||$("#unit").val()=="oz" || $("#unit").val()=="su bardağı" || $("#unit").val()=="çay bardağı" ){
+      $("#amount").append("<option id='1/4'>"+1/4+"</option>");
+      $("#amount").append("<option id='1/2'>"+1/2+"</option>");
+      $("#amount").append("<option id='3/4'>"+3/4+"</option>");
+      for (i=1;i<=100;i=i+0.25){
+        $("#amount").append("<option id='"+i+"'>"+i+"</option>");
+      }
+    }
+    else{
+      for (i=1;i<=2000;i++){
+        $("#amount").append("<option id='"+i+"'>"+i+"</option>");
+      }
+    }
+  }
+  function addItemToList(id) {
+    var $myList = $('#ingList');
+    var $deleteLink = $('<a href="#" id="'+id+'"> x</a>');
+    $deleteLink.on('click', function(e) {
+      e.preventDefault();
+      var deleteValue=$(this)[0].id;
+      delete dict[deleteValue];
+      $(this).parent().remove();
+      updateIngList();
+    })
+
+    var $entry = $('<li id="ingList" name="ingList">'+id+'</li>')
+    $entry.append($deleteLink)
+    $myList.append($entry);
+    updateIngList();
+  }
+  function updateIngList(){
+    var temp="";
+    for (var key in dict){
+        if (dict.hasOwnProperty(key)){
+          if(temp=="")
+            temp= dict[key];
+          else
+            temp=temp+"*"+dict[key];
+        }
+    }
+    $('#hiddenIngList').val(temp);
+  }
+  function checknutrientIsOk(nutrientName){
+    var i;
+    for (i=0;i<keywords.length;i++){
+      var str=keywords[i];
+        if ( nutrientName.includes(str))
+          return true;
+    }
+    return false;
+  }
+  function convertToGram(amount,unit){
+    if(unit=="teaspoon")
+      return amount*227/48;
+    if(unit=="tablespoon")
+      return amount*227/16 ;
+    if(unit=="tatlı kaşığı")
+      return amount*227/48 ;
+    if(unit=="çay kaşığı")
+      return amount*227/96 ;
+    if(unit=="yemek kaşığı")
+      return amount*227/16 ;
+    if(unit=="oz")
+      return amount*227/8 ;
+    if(unit=="cup")
+      return amount*227;
+    if(unit=="su bardağı")
+      return amount*227;
+    if(unit=="çay bardağı")
+      return amount*227/2;
+    if(unit=="ml")
+      return amount*227/237;
+    return amount;
+  }
+  function convertNutritions(nutrients,gramValue){
+    var multiplier=gramValue/100;
+    var listNutrients=nutrients.split(";");
+    var newListNutrients="";
+    var i;
+    for(i=0;i<listNutrients.length;i=i+1){
+      var nutrients=listNutrients[i].split(" ");
+      var nutrientName="";
+      var j;
+      for(j=0;j<nutrients.length-2;j=j+1){
+        if(j==0)
+          nutrientName=nutrients[j];
+        else
+          nutrientName+=nutrients[j];
+      }
+      var amount=  nutrients[nutrients.length-2]*multiplier;
+      if(newListNutrients=="")
+        newListNutrients=nutrientName+" "+amount.toFixed(2)+" "+nutrients[nutrients.length-1]+"; ";
+      else
+        newListNutrients+=nutrientName+" "+amount.toFixed(2)+" "+nutrients[nutrients.length-1]+"; ";
+
+    }
+    return newListNutrients;
+  }
 </script>
 {% endblock %}
