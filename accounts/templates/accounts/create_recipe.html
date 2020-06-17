@@ -193,7 +193,7 @@
           selectedFoodItem['nutrientItems']=nutrientItems;
           selectedFoodItem['amount'] = $("#amount").find('option:selected').val();
           selectedFoodItem['unit'] = $("#unit").find('option:selected').val();
-          if(response['foodPortions']!==null ){
+          if(response['foodPortions']!==null && response['foodPortions'].length>0 ){
             var hintPortionDesc=response['foodPortions'][0]['portionDescription'];
             var hintGramWeight=response['foodPortions'][0]['gramWeight'];
             var hintAmount=response['foodPortions'][0]['amount'];
