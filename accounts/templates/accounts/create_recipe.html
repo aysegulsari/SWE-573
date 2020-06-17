@@ -136,8 +136,9 @@
         var item=selectedFoodItem['desc']+";"+amount+";"+unit+"_";//+  selectedFoodItem['nutrientItems']['nutrient'];
         var gramValue=convertToGram(amount,unit);
         var convertedNutritionalValues=convertNutritions(selectedFoodItem['nutrientItems']['nutrient'], gramValue);
-        item+=convertedNutritionalValues;
-        dict[item]=item;
+        var itemWithNutrients=item+convertedNutritionalValues;
+        dict[item]=itemWithNutrients;
+        //addItemToList(item);
         addItemToList(item);
       })
       $(function(e){
@@ -192,7 +193,7 @@
           selectedFoodItem['nutrientItems']=nutrientItems;
           selectedFoodItem['amount'] = $("#amount").find('option:selected').val();
           selectedFoodItem['unit'] = $("#unit").find('option:selected').val();
-          if(response['foodPortions']!==null){
+          if(response['foodPortions']!==null ){
             var hintPortionDesc=response['foodPortions'][0]['portionDescription'];
             var hintGramWeight=response['foodPortions'][0]['gramWeight'];
             var hintAmount=response['foodPortions'][0]['amount'];
@@ -313,9 +314,9 @@
       }
       var amount=  nutrients[nutrients.length-2]*multiplier;
       if(newListNutrients=="")
-        newListNutrients=nutrientName+" "+amount+" "+nutrients[nutrients.length-1]+"; ";
+        newListNutrients=nutrientName+" "+amount.toFixed(2)+" "+nutrients[nutrients.length-1]+"; ";
       else
-        newListNutrients+=nutrientName+" "+amount+" "+nutrients[nutrients.length-1]+"; ";
+        newListNutrients+=nutrientName+" "+amount.toFixed(2)+" "+nutrients[nutrients.length-1]+"; ";
 
     }
     return newListNutrients;
