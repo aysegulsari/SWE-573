@@ -1,0 +1,61 @@
+{% extends "base.html"%}
+{% load bootstrap3%}
+{% block content %}
+<div class="container">
+  <div class="jumbotron">
+    <form method='POST'>
+      {% csrf_token %}
+      <h2>Recipe Details</h2>
+      <p>Recipe Title: {{recipe.title}}</p>
+      <p>Description: {{recipe.description}}</p>
+      <p>Instructions: {{recipe.instructions}}</p>
+      <p>Duration: {{recipe.duration}}</p>
+      <p>Level: {{recipe.level}}</p>
+      <p>Ingredients:</p>
+      <ul id="ingList" name="ingList" ></ul>
+      <p>Nutrients:</p>
+      <p id="nutrientList" name="nutrientList"></p>
+
+      <div class="form-group row text-right">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+          <a class="" href="{% url 'accounts:recipe_update_details' %}" class="btn btn-outline-primary">Update Recipe</a>
+        </div>
+      </div>
+
+
+    </form>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function(){
+      $(function(e){
+        var ingredientsWithColon="{{recipe.ingredients}}"
+        var ingredientList = ingredientsWithColon.split("*");
+        var $myList = $('#ingList');
+
+        for (i=0;i<ingredientList.length;i=i+1){
+          var item=ingredientList[i];
+          if(item=="")
+            continue;
+          var ingredientWithoutNutrition=ingredientList[i].split("_");
+          var $entry = $('<li id="ingList" name="ingList">'+ingredientWithoutNutrition[0]+'</li>');
+          $myList.append($entry);
+        }
+
+        var nutrientsWithSemiColon="{{recipe.nutrients}}"
+        var nutrientsList = nutrientsWithSemiColon.split(";");
+        var $myList = $('#nutrientList');
+
+        for (i=0;i<nutrientsList.length;i=i+1){
+          var item=nutrientsList[i];
+          if(item=="" || item==" ")
+            continue;
+          var $entry = $('<li id="ingList" name="ingList">'+item+'</li>');
+          $myList.append($entry);
+        }
+      })
+	})
+
+</script>
+{% endblock %}

@@ -138,7 +138,7 @@ def create_recipe(request):
             duration =  user_form.cleaned_data.get('duration')
             level=request.POST.get('level')
             ingredients = request.POST.get('hiddenIngList')
-
+            nutrients=request.POST.get('nutrientsTotal')
             #ingredients=""
             #for ing in ingList:
             #    ingredients+="ing"
@@ -147,7 +147,7 @@ def create_recipe(request):
                 error_Message="First select ingredients!"
                 isOk="First select ingredients!"
             else:
-                Recipe.objects.create(user=user,title=title,description=description,instructions=instructions,duration=duration,level=level,ingredients=ingredients)
+                Recipe.objects.create(user=user,title=title,description=description,instructions=instructions,duration=duration,level=level,ingredients=ingredients,nutrients=nutrients)
                 isOk= "saved with "+ ingredients
                 return HttpResponseRedirect(reverse_lazy("accounts:list_recipes"))
     else:
@@ -220,11 +220,25 @@ class RecipeDetailView(DetailView):
                 recipe.duration =  user_form.cleaned_data.get('duration')
                 recipe.level=request.POST.get('level')
                 recipe.ingredients = request.POST.get('hiddenIngList')
+                recipe.nutrients=request.POST.get('nutrientsTotal')
                 if recipe.ingredients is None:
                     error_Message="First select ingredients!"
                 else:
                     recipe.save()
             return render(request,'accounts/recipe_details.html',
+                          {'recipe':recipe,
+                           'errorMessage':errorMessage,
+                           })
+
+class RecipeJustDetailView(DetailView):
+    def get(self,request,**kwargs):
+        errorMessage=""
+        if request.method=="GET":
+            id = self.kwargs.get('pk')
+            recipe=Recipe.objects.get(pk=id)
+            if recipe is None:
+                errorMessage="No recipe is created!"
+        return render(request,'accounts/recipe_just_details.html',
                           {'recipe':recipe,
                            'errorMessage':errorMessage,
                            })

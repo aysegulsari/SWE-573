@@ -76,8 +76,16 @@
             <span class="input-group-text" id="inputGroup-sizing-default">Ingredients</span>
           </div>
           <ul id="ingList" name="ingList" ></ul>
-          <textarea id="hiddenIngList" name="hiddenIngList" style="display:none;"></textarea>
         </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Nutrients:</span>
+          </div>
+          <ul id="nutrientList" name="nutrientList" ></ul>
+        </div>
+        <textarea id="hiddenIngList" name="hiddenIngList" style="display:none;"></textarea>
+        <textarea id="nutrientsTotal" name="nutrientsTotal" style="display:none;"></textarea>
+
         <div class="form-group row text-right">
           <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
             <input type="submit" class="btn btn-outline-primary" value="Save"></input>
@@ -89,10 +97,14 @@
 </div>
 
 <script>
-  var dict = {};
+  var ingredientDict = {};
   var selectedFoodItem={};
-  var keywords=['Energy','Protein','fat','Carbohydrate','Calcium','Iron','Magnesium', 'B-12','B-6',
+  var keywords=['Energy','Protein','fat','Carbohydrate, by difference','Calcium','Iron','Magnesium', 'B-12','B-6',
   'Phosphorus','Potassium', 'Vitamin A','Vitamin D']
+  var nutrientDict={'Energy':0,'Protein':0,'Fat':0,'Carbohydrate':0,'Calcium':0,'Iron':0,'Magnesium':0, 'B-12':0,'B-6':0,
+  'Phosphorus':0,'Potassium':0, 'Vitamin A':0,'Vitamin D':0}
+  var nutrientUnits={'Energy':'kcal','Protein':'g','Fat':'g','Carbohydrate':'g','Calcium':'mg','Iron':'mg',
+  'Magnesium':'mg', 'B-12':'mg','B-6':'mg','Phosphorus':'mg','Potassium':'g', 'Vitamin A':'g','Vitamin D':'IU'}
   $(document).ready(function(){
 			$("#search").click(function(e){
 				e.preventDefault();
@@ -101,7 +113,6 @@
         nutritientDetails.innerHTML="";
         var nutritientDetails = document.getElementById('nutritientDetails')
         nutritientDetails.innerHTML="";
-
 				$.ajax({
 					type : 'GET',
 					url : "https://api.nal.usda.gov/fdc/v1/foods/search",
@@ -131,15 +142,17 @@
         e.preventDefault();
         if(jQuery.isEmptyObject(selectedFoodItem))
           return;
-        var amount=  $("#amount").find('option:selected').val();
+        var amount=$("#amount").find('option:selected').val();
         var unit=$("#unit").find('option:selected').val();
-        var item=selectedFoodItem['desc']+";"+amount+";"+unit;//+  selectedFoodItem['nutrientItems']['nutrient'];
         var gramValue=convertToGram(amount,unit);
-        var convertedNutritionalValues=convertNutritions(selectedFoodItem['nutrientItems']['nutrient'], gramValue);
-        var itemWithNutrients=item+"_"+convertedNutritionalValues;
-        dict[item]=itemWithNutrients;
-        //addItemToList(item);
-        addItemToList(item);
+        var convertedNutritionalValues=convertNutritions(selectedFoodItem['nutrientItems'], gramValue);
+        var item={"id":selectedFoodItem['id'],"name":selectedFoodItem['desc'],"amount":amount,"unit":unit,"nutrientsList":convertedNutritionalValues}
+        if(ingredientDict.hasOwnProperty(item["name"]))
+          alert("ingredient already added!");
+        else{
+          ingredientDict[item["name"]]=item;
+          addIngredientToList(item);
+        }
       })
       $(function(e){
         if($("#unit").val()=="teaspoon" || $("#unit").val()=="tablespoon" || $("#unit").val()=="cup" ||$("#unit").val()=="oz" || $("#unit").val()=="su bardağı" || $("#unit").val()=="çay bardağı" ){
@@ -171,26 +184,27 @@
           selectedFoodItem['desc'] = response['description'];
           selectedFoodItem['id'] = response['fdcId'];
           nutrientList=response['foodNutrients'];
+          var addedNutrientList=[];
+          var newNutrientItem={};
+          var newListNutrients=[];
           if (nutrientList!==null){
-            nutrientItems={}
-            var i;
             for(i=0;i<nutrientList.length;i++){
-
-                var nutrientName=nutrientList[i]['nutrient']['name'];
-                var nutrientIsOk=checknutrientIsOk(nutrientName);
-                if(nutrientIsOk==true){
-                  var amount=nutrientList[i]['amount'];
-                  var unit=nutrientList[i]['nutrient']['unitName']
-                  if(nutrientName!==undefined && amount!==undefined && unit!==undefined){
-                    if(nutrientItems['nutrient']==undefined)
-                      nutrientItems['nutrient']=nutrientName+' '+amount+' '+unit+'; ';
-                    else
-                      nutrientItems['nutrient']+=nutrientName+' '+amount+' '+unit+'; ';
+              var nutrientName=nutrientList[i]['nutrient']['name'];
+              var unit=nutrientList[i]['nutrient']['unitName']
+              var amount=nutrientList[i]['amount'];
+              var nutrientNameAdjusted=getNutrientName(nutrientName,unit);
+              if(nutrientNameAdjusted!=""){
+                if(nutrientNameAdjusted!==undefined && amount!==undefined && unit!==undefined){
+                  newNutrientItem={"nutrientName":nutrientNameAdjusted,"nutrientAmount":amount,"unit":unit}
+                  if(!addedNutrientList.includes(nutrientNameAdjusted)){
+                    newListNutrients.push(newNutrientItem);
+                    addedNutrientList.push(nutrientNameAdjusted)
                   }
                 }
               }
+            }
           }
-          selectedFoodItem['nutrientItems']=nutrientItems;
+          selectedFoodItem['nutrientItems']=newListNutrients;
           selectedFoodItem['amount'] = $("#amount").find('option:selected').val();
           selectedFoodItem['unit'] = $("#unit").find('option:selected').val();
           if(response['foodPortions']!==null && response['foodPortions'].length>0 ){
@@ -213,7 +227,11 @@
               nutritientDetails.innerHTML="Suggested amount "+"</br>"+hint;
           }
           var nutritientDetails = document.getElementById('nutritientDetails')
-          nutritientDetails.innerHTML="Nutrient details of selected food(for 100 gram): "+nutrientItems['nutrient'];
+          nutritientDetails.innerHTML="Nutrient details of selected food(for 100 gram): ";
+          for(i=0;i<newListNutrients.length;i++){
+            var n=newListNutrients[i];
+            nutritientDetails.innerHTML+=n['nutrientName']+" "+n['nutrientAmount']+" "+n['unit']+"; ";
+          }
         },
         error : function(response){
           console.log(response)
@@ -237,42 +255,87 @@
       }
     }
   }
-  function addItemToList(id) {
+  function addIngredientToList(ingredient) {
     var $myList = $('#ingList');
-    var $deleteLink = $('<a href="#" id="'+id+'"> x</a>');
+    var ing= ingredient["name"]+" "+ingredient["amount"]+" "+ ingredient["unit"];
+    var $deleteLink = $('<a href="#" id="'+ing+'"> x</a>');
     $deleteLink.on('click', function(e) {
       e.preventDefault();
       var deleteValue=$(this)[0].id;
-      delete dict[deleteValue];
       $(this).parent().remove();
-      updateIngList();
+      updateIngList(deleteValue);
     })
-
-    var $entry = $('<li id="ingList" name="ingList">'+id+'</li>')
+    var $entry = $('<li id="ingList" name="ingList">'+ing+'</li>')
     $entry.append($deleteLink)
     $myList.append($entry);
     updateIngList();
   }
-  function updateIngList(){
+  function updateIngList(deleteValue){
     var temp="";
-    for (var key in dict){
-        if (dict.hasOwnProperty(key)){
-          if(temp=="")
-            temp= dict[key];
-          else
-            temp=temp+"*"+dict[key];
+    nutrientDict={'Energy':0,'Protein':0,'Fat':0,'Carbohydrate':0,'Calcium':0,'Iron':0,'Magnesium':0, 'B-12':0,'B-6':0,
+    'Phosphorus':0,'Potassium':0, 'Vitamin A':0,'Vitamin D':0}
+    var nutrientsTotal="";
+    for (var key in ingredientDict){
+      //ingredient part
+        if (ingredientDict.hasOwnProperty(key)){
+          if(deleteValue==null || deleteValue==undefined){
+            if(temp=="")
+              temp=JSON.stringify(ingredientDict[key]);
+            else
+              temp=temp+"*"+JSON.stringify(ingredientDict[key]);
+          }
+          else{
+            if(deleteValue.includes(key))
+              delete ingredientDict[key];
+          }
         }
+      //nutrientPart
+      if(ingredientDict!==null && ingredientDict!==undefined && ingredientDict.hasOwnProperty(key)){
+        for(i=0;i<ingredientDict[key]["nutrientsList"].length;i++) {
+          var nutrient=ingredientDict[key]["nutrientsList"][i];
+          var name=nutrient["nutrientName"];
+          var amount=Number(nutrient["nutrientAmount"]).toFixed(2);
+          var unit=nutrient["unit"];
+
+          if(nutrientDict.hasOwnProperty(name)){
+            var value=Number(nutrientDict[name])+Number(amount);
+            nutrientDict[name]=value.toFixed(2);
+            nutrientUnits[name]=unit;
+          }
+        }
+      }
     }
+    $('#nutrientList').empty();
+    var $myList = $('#nutrientList');
+    for(var n in nutrientDict){
+      if(nutrientsTotal=="")
+        nutrientsTotal=n+" "+nutrientDict[n]+" "+nutrientUnits[n]+"; ";
+      else
+        nutrientsTotal+=n+" "+nutrientDict[n]+" "+nutrientUnits[n]+"; ";
+      var $entry = $('<li id="ingList" name="ingList">'+n+" "+nutrientDict[n]+" "+nutrientUnits[n]+'</li>');
+      $myList.append($entry);
+    }
+    $('#nutrientsTotal').val(nutrientsTotal);
     $('#hiddenIngList').val(temp);
   }
-  function checknutrientIsOk(nutrientName){
-    var i;
+  function getNutrientName(nutrientName,unit){
     for (i=0;i<keywords.length;i++){
       var str=keywords[i];
-        if ( nutrientName.includes(str))
-          return true;
+        if (nutrientName.includes(str)){
+          if(str=="fat")
+            str= "Fat";
+          else if(str=="Carbohydrate, by difference")
+            str="Carbohydrate";
+          else if(str=="Vitamin A")
+              str="VitaminA";
+          else if(str=="Vitamin D")
+                  str="VitaminD";
+          //else if(str=="Energy" && unit!="kcal")
+          //  str="";
+          return str;
+        }
     }
-    return false;
+    return "";
   }
   function convertToGram(amount,unit){
     if(unit=="teaspoon")
@@ -297,27 +360,16 @@
       return amount*227/237;
     return amount;
   }
-  function convertNutritions(nutrients,gramValue){
+  function convertNutritions(nutrientsList,gramValue){
     var multiplier=gramValue/100;
-    var listNutrients=nutrients.split(";");
-    var newListNutrients="";
-    var i;
-    for(i=0;i<listNutrients.length;i=i+1){
-      var nutrients=listNutrients[i].split(" ");
-      var nutrientName="";
-      var j;
-      for(j=0;j<nutrients.length-2;j=j+1){
-        if(j==0)
-          nutrientName=nutrients[j];
-        else
-          nutrientName+=nutrients[j];
-      }
-      var amount=  nutrients[nutrients.length-2]*multiplier;
-      if(newListNutrients=="")
-        newListNutrients=nutrientName+" "+amount.toFixed(2)+" "+nutrients[nutrients.length-1]+"; ";
-      else
-        newListNutrients+=nutrientName+" "+amount.toFixed(2)+" "+nutrients[nutrients.length-1]+"; ";
-
+    var newNutrientItem={};
+    var newListNutrients=[];
+    for(i=0;i<nutrientsList.length;i=i+1){
+      var nutrientName=nutrientsList[i]["nutrientName"];
+      var amount= nutrientsList[i]["nutrientAmount"]*multiplier;
+      var unit=nutrientsList[i]["unit"];
+      newNutrientItem={"nutrientName":nutrientName,"nutrientAmount":amount.toFixed(2),"unit":unit}
+      newListNutrients.push(newNutrientItem);
     }
     return newListNutrients;
   }
