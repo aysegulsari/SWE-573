@@ -13,7 +13,7 @@ from django.views.generic import (View,TemplateView,
                                 ListView,DetailView,
                                 CreateView,DeleteView,
                                 UpdateView)
-
+from django.shortcuts import redirect
 
 @login_required
 def user_logout(request):
@@ -183,7 +183,6 @@ def search_ingredient(request):
 
 
 class RecipeListView(ListView):
-
     def get(self, request):
         errorMessage=""
         recipes=Recipe.objects.filter(user=request.user)
@@ -224,7 +223,11 @@ class RecipeDetailView(DetailView):
                 if recipe.ingredients is None:
                     error_Message="First select ingredients!"
                 else:
-                    recipe.save()
+                    if request.POST.get("Update"):
+                        recipe.save()
+                    else:
+                        recipe.delete()
+                        return redirect(reverse('accounts:list_recipes'))
             return render(request,'accounts/recipe_details.html',
                           {'recipe':recipe,
                            'errorMessage':errorMessage,
