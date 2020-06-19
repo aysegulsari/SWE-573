@@ -18,7 +18,7 @@ class UserForm(forms.ModelForm):
 class UserProfileInfoForm(forms.ModelForm):
     class Meta():
         model = UserProfileInfo
-        fields = ('user_type',)
+        fields = ('user_type','birthday','provider_name','address','phone_number')
 
 
 class EditProfileForm(forms.ModelForm):
