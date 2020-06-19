@@ -6,7 +6,7 @@
       <h3>{{user.username}}'s Profile</h3>
       <form enctype="multipart/form-data" method="POST">
          {% csrf_token %}
-          <textarea id="user_type" name="user_type" style="display:none;" value={{ user_type }}>{{ user_type }}</textarea>
+          <textarea id="user_type" name="user_type" style="display:none;" value={{ userProfile.user_type }}>{{ userProfile.user_type }}</textarea>
           <p>First name: {{user.first_name}}</p>
           <p>Last name: {{user.last_name}}</p>
           <p>Email: {{user.email}}</p>
@@ -14,7 +14,8 @@
           <p id="provider_name">ProviderName: {{userProfile.provider_name}}</p>
           <p id="address">Address: {{userProfile.address}}</p>
           <p id="phone_number">Phone Number: {{userProfile.phone_number}}</p>
-      </form>
+          <a href="{% url 'accounts:list_recipes' %}">{{user.username}}'s Recipes</a>
+          
   </div>
 </div>
 

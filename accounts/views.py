@@ -262,11 +262,12 @@ class MyProfileView(DetailView):
             # id = self.kwargs.get('pk')
             user = request.user
             userProfile = UserProfileInfo.objects.get(user=user)
+            recipes = Recipe.objects.filter(user=request.user)
             # if recipe is None:
             #    errorMessage="No recipe is created!"
         return render(request, 'accounts/profile.html',
                       {'user': user,
                        'userProfile':userProfile,
-                       'user_type': userProfile.user_type,
+                       'recipes':recipes,
                        'errorMessage': errorMessage,
                        })

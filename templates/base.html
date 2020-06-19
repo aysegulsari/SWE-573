@@ -17,8 +17,8 @@
           <a class="navbar-brand mynav" href="{% url 'home' %}">HungryForRecipe</a>
           {% if user.is_authenticated %}
           <a class="nav-item nav-link" href="{% url 'accounts:profile_page' %}" class="btn btn-simple">Profile</a>
-          <a class="nav-item nav-link" href="{% url 'accounts:create_recipe' %}" class="btn btn-simple">Create Recipe</a>
-          <a class="nav-item nav-link" href="{% url 'accounts:list_recipes' %}" class="btn btn-simple">My Recipes</a>
+         <!-- <a class="nav-item nav-link" href="{% url 'accounts:create_recipe' %}" class="btn btn-simple">Create Recipe</a>-->
+         <!--  <a class="nav-item nav-link" href="{% url 'accounts:list_recipes' %}" class="btn btn-simple">My Recipes</a>-->
 
           {% endif %}
         </div>
