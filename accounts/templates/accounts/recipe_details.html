@@ -55,6 +55,7 @@
           <select class="form-control" id="search_results" onchange="getSelectedFoodItem(this.value)"></select>
           <select class="form-control" id="amount"></select>
           <select class="form-control" id="unit" onchange="unitChangeFunction(this.value)">
+            <option value="gram">gram</option>
             <option value="teaspoon">teaspoon</option>
             <option value="tablespoon">tablespoon</option>
             <option value="tatlı kaşığı">tatlı kaşığı</option>
@@ -65,7 +66,6 @@
             <option value="su bardağı">su bardağı</option>
             <option value="çay bardağı">çay bardağı</option>
             <option value="ml">ml</option>
-            <option value="gram">gram</option>
           </select>
           <button id="add" class="btn btn-outline-primary">Add ingredient</button>
         </div>
@@ -155,19 +155,7 @@
       }
     })
     $(function(e){
-      if($("#unit").val()=="teaspoon" || $("#unit").val()=="tablespoon" || $("#unit").val()=="cup" ||$("#unit").val()=="oz" || $("#unit").val()=="su bardağı" || $("#unit").val()=="çay bardağı" ){
-        $("#amount").append("<option id='1/4'>"+1/4+"</option>");
-        $("#amount").append("<option id='1/2'>"+1/2+"</option>");
-        $("#amount").append("<option id='3/4'>"+3/4+"</option>");
-        for (i=1;i<=100;i=i+0.25){
-          $("#amount").append("<option id='"+i+"'>"+i+"</option>");
-        }
-      }
-      else{
-        for (i=1;i<=2000;i++){
-          $("#amount").append("<option id='"+i+"'>"+i+"</option>");
-        }
-      }
+      unitChangeFunction();
     })
     $(function(e){
       var ingredientsWithColon="{{recipe.ingredients}}"
@@ -175,11 +163,13 @@
       var $myList = $('#ingList');
       for (counter=0;counter<ingredientList.length;counter++){
         var item=ingredientList[counter];
-        var selectedFoodItem = JSON.parse(item.replace(/&quot;/g,'"'));
-        ingredientDict[selectedFoodItem["name"]]=selectedFoodItem;
-        addIngredientToList(selectedFoodItem)
+        if(item!=""){
+          var selectedFoodItem = JSON.parse(item.replace(/&quot;/g,'"'));
+          ingredientDict[selectedFoodItem["name"]]=selectedFoodItem;
+          addIngredientToList(selectedFoodItem)
         }
-      })
+      }
+    })
 	})
   function getSelectedFoodItem(){
     selectedFoodItem={};
@@ -199,10 +189,10 @@
           var newNutrientItem={};
           var newListNutrients=[];
           if (nutrientList!==null){
-            for(i=0;i<nutrientList.length;i++){
-              var nutrientName=nutrientList[i]['nutrient']['name'];
-              var unit=nutrientList[i]['nutrient']['unitName']
-              var amount=nutrientList[i]['amount'];
+            for(nut=0;nut<nutrientList.length;nut++){
+              var nutrientName=nutrientList[nut]['nutrient']['name'];
+              var unit=nutrientList[nut]['nutrient']['unitName']
+              var amount=nutrientList[nut]['amount'];
               var nutrientNameAdjusted=getNutrientName(nutrientName,unit);
               if(nutrientNameAdjusted!=""){
                 if(nutrientNameAdjusted!==undefined && amount!==undefined && unit!==undefined){
@@ -239,8 +229,8 @@
           }
           var nutritientDetails = document.getElementById('nutritientDetails')
           nutritientDetails.innerHTML="Nutrient details of selected food(for 100 gram): ";
-          for(i=0;i<newListNutrients.length;i++){
-            var n=newListNutrients[i];
+          for(ne=0;ne<newListNutrients.length;ne++){
+            var n=newListNutrients[ne];
             nutritientDetails.innerHTML+=n['nutrientName']+" "+n['nutrientAmount']+" "+n['unit']+"; ";
           }
         },
@@ -256,13 +246,13 @@
       $("#amount").append("<option id='1/4'>"+1/4+"</option>");
       $("#amount").append("<option id='1/2'>"+1/2+"</option>");
       $("#amount").append("<option id='3/4'>"+3/4+"</option>");
-      for (i=1;i<=100;i=i+0.25){
-        $("#amount").append("<option id='"+i+"'>"+i+"</option>");
+      for (index=1;index<=100;index=index+0.25){
+        $("#amount").append("<option id='"+index+"'>"+index+"</option>");
       }
     }
     else{
-      for (i=1;i<=2000;i++){
-        $("#amount").append("<option id='"+i+"'>"+i+"</option>");
+      for (index=1;index<=2000;index++){
+        $("#amount").append("<option id='"+index+"'>"+index+"</option>");
       }
     }
   }
@@ -302,8 +292,8 @@
         }
       //nutrientPart
       if(ingredientDict!==null && ingredientDict!==undefined && ingredientDict.hasOwnProperty(key)){
-        for(i=0;i<ingredientDict[key]["nutrientsList"].length;i++) {
-          var nutrient=ingredientDict[key]["nutrientsList"][i];
+        for(u=0;u<ingredientDict[key]["nutrientsList"].length;u++) {
+          var nutrient=ingredientDict[key]["nutrientsList"][u];
           var name=nutrient["nutrientName"];
           var amount=Number(nutrient["nutrientAmount"]).toFixed(2);
           var unit=nutrient["unit"];
@@ -330,8 +320,8 @@
     $('#hiddenIngList').val(temp);
   }
   function getNutrientName(nutrientName,unit){
-    for (i=0;i<keywords.length;i++){
-      var str=keywords[i];
+    for (g=0;g<keywords.length;g++){
+      var str=keywords[g];
         if (nutrientName.includes(str)){
           if(str=="fat")
             str= "Fat";
@@ -375,10 +365,10 @@
     var multiplier=gramValue/100;
     var newNutrientItem={};
     var newListNutrients=[];
-    for(i=0;i<nutrientsList.length;i=i+1){
-      var nutrientName=nutrientsList[i]["nutrientName"];
-      var amount= nutrientsList[i]["nutrientAmount"]*multiplier;
-      var unit=nutrientsList[i]["unit"];
+    for(c=0;c<nutrientsList.length;c++){
+      var nutrientName=nutrientsList[c]["nutrientName"];
+      var amount= nutrientsList[c]["nutrientAmount"]*multiplier;
+      var unit=nutrientsList[c]["unit"];
       newNutrientItem={"nutrientName":nutrientName,"nutrientAmount":amount.toFixed(2),"unit":unit}
       newListNutrients.push(newNutrientItem);
     }
