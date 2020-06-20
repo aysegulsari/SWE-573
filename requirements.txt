@@ -8,7 +8,7 @@ channels==2.4.0
 constantly==15.1.0
 cryptography==2.9.2
 daphne==2.5.0
-Django==3.0.5
+Django==3.0.7
 django-bootstrap3==12.1.0
 django-environ==0.4.5
 django-phonenumber-field==4.0.0
