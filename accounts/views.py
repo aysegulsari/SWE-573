@@ -3,13 +3,12 @@ from .forms import UserForm, UserProfileInfoForm, EditProfileForm, CreateRecipeF
     UpdateRecipeForm
 from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import PasswordChangeForm
 from .models import Recipe, UserProfileInfo
-import json
-from urllib.request import urlopen
+from django.contrib.auth.models import User
+from django.db.models import Q
 from django.views.generic import (View, TemplateView,
                                   ListView, DetailView,
                                   CreateView, DeleteView,
@@ -131,6 +130,7 @@ def create_recipe(request):
     ingredients = ""
     error_Message = ""
     isOk = ""
+    user=request.user
     if request.method == 'POST':
         user_form = CreateRecipeForm(request.POST)
         if user_form.is_valid():
@@ -200,8 +200,21 @@ def search_list(request):
     currently available polls
     """
     userProfiles = UserProfileInfo.objects.all()
-    search_term=" "
-    return render(request, 'accounts/search.html', {'userProfiles': userProfiles})
+    recipes=Recipe.objects.all()
+    displayUser=False
+    displayRecipe=False
+    if 'search' in request.GET:
+        search_term = request.GET['search']
+        type=request.GET['type']
+        if type=="user":
+            users=User.objects.filter(username__icontains=search_term)
+            userProfiles = userProfiles.filter(user__in=users)
+            displayUser=True
+        elif type=="recipe":
+            recipes=Recipe.objects.filter(Q(ingredients__icontains=search_term) | Q(title__icontains=search_term))
+            displayRecipe=True
+
+    return render(request, 'accounts/search.html', {'userProfiles': userProfiles,'recipes':recipes,'displayUser':displayUser,'displayRecipe':displayRecipe})
 
 '''
     if 'text' in request.GET:
