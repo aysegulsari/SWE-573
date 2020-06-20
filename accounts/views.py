@@ -135,6 +135,7 @@ def create_recipe(request):
         user_form = CreateRecipeForm(request.POST)
         if user_form.is_valid():
             user = request.user
+            userProfile=UserProfileInfo.objects.get(user=user)
             title = user_form.cleaned_data.get('title')
             description = user_form.cleaned_data.get('description')
             instructions = user_form.cleaned_data.get('instructions')
@@ -153,7 +154,13 @@ def create_recipe(request):
                 Recipe.objects.create(user=user, title=title, description=description, instructions=instructions,
                                       duration=duration, level=level, ingredients=ingredients, nutrients=nutrients)
                 isOk = "saved with " + ingredients
-                return HttpResponseRedirect(reverse_lazy("accounts:list_recipes"))
+            recipes = Recipe.objects.filter(user=user)
+            return render(request, 'accounts/list_recipes.html',
+                              {'recipes': recipes,
+                               'errorMessage': error_Message,
+                               'userProfile': userProfile
+                               })
+                #return HttpResponseRedirect(reverse_lazy("accounts:list_recipes",kwargs={'pk': user.userprofileinfo.id}))
     else:
         user_form = CreateRecipeForm()
         if user_form.is_valid():
@@ -172,32 +179,60 @@ def create_recipe(request):
                    'isOk': isOk,
                    })
 
-
-def search_ingredient(request):
-    if request.method == "GET":
-        search_term = request.GET.get('search_term', None)
-        api_key = "hExa857fawOBmDsWG4ii7gpzUqBEDKJ2aGn0nzvx"
-        url = "https://api.nal.usda.gov/fdc/v1/foods/search?api_key={}&query={}".format(api_key, "search_term")
-        serialized_data = urlopen(url).read()
-        data = json.loads(serialized_data)
-        isSearchOk = True
-        foods = data["foods"]
-        return JsonResponse({"foods": foods}, status=200)
-    else:
-        return JsonResponse({"success": False}, status=400)
-
-
 class RecipeListView(ListView):
-    def get(self, request):
+    def get(self, request,**kwargs):
         errorMessage = ""
-        recipes = Recipe.objects.filter(user=request.user)
-        if recipes is None:
-            errorMessage = "No recipe is created!"
-        return render(request, 'accounts/list_recipes.html',
+        if request.method == "GET":
+            id=self.kwargs.get('user_profile_id')
+            userProfile=UserProfileInfo.objects.get(id=id)
+            recipes = Recipe.objects.filter(user=userProfile.user)
+            if recipes is None:
+                errorMessage = "No recipe is created!"
+            return render(request, 'accounts/list_recipes.html',
                       {'recipes': recipes,
                        'errorMessage': errorMessage,
-                       'username': request.user,
+                       'userProfile':userProfile
                        })
+
+def search_list(request):
+    """
+    Renders the polls_list.html template which lists all the
+    currently available polls
+    """
+    userProfiles = UserProfileInfo.objects.all()
+    search_term=" "
+    return render(request, 'accounts/search.html', {'userProfiles': userProfiles})
+
+'''
+    if 'text' in request.GET:
+        polls = polls.order_by('text')
+
+    if 'pub_date' in request.GET:
+        polls = polls.order_by('-pub_date')
+
+    if 'num_votes' in request.GET:
+        polls = polls.annotate(Count('vote')).order_by('-vote__count')
+
+    if 'search' in request.GET:
+        search_term = request.GET['search']
+        polls = polls.filter(text__icontains=search_term)
+
+    paginator = Paginator(polls, 5)
+
+    page = request.GET.get('page')
+    polls = paginator.get_page(page)
+
+    get_dict_copy = request.GET.copy()
+    params = get_dict_copy.pop('page', True) and get_dict_copy.urlencode()
+'''
+def user_detail(request, user_profile_id):
+    """
+    Render the poll_detail.html template which allows a user to vote
+    on the choices of a poll
+    """
+    userProfile = UserProfileInfo.objects.get(id=user_profile_id)
+
+    return render(request, 'accounts/user_detail.html', {'userProfile':userProfile})
 
 
 class RecipeDetailView(DetailView):
@@ -269,5 +304,38 @@ class MyProfileView(DetailView):
                       {'user': user,
                        'userProfile':userProfile,
                        'recipes':recipes,
+                       'errorMessage': errorMessage,
+                       })
+
+
+
+
+class SearchView(DetailView):
+    def get(self, request, **kwargs):
+        errorMessage = ""
+        if request.method == "GET":
+            # id = self.kwargs.get('pk')
+            user = request.user
+            userProfile = UserProfileInfo.objects.get(user=user)
+            recipes = Recipe.objects.filter(user=request.user)
+            # if recipe is None:
+            #    errorMessage="No recipe is created!"
+        return render(request, 'accounts/search.html',
+                      {'user': user,
+                       'userProfile':userProfile,
+                       'recipes':recipes,
+                       'errorMessage': errorMessage,
+                       })
+
+    def post(self, request, **kwargs):
+        errorMessage = ""
+        if request.method == "POST":
+            id = self.kwargs.get('pk')
+
+            recipe = Recipe.objects.get()
+            if recipe is None:
+                errorMessage = "No recipe is created!"
+        return render(request, 'accounts/recipe_just_details.html',
+                      {'recipe': recipe,
                        'errorMessage': errorMessage,
                        })

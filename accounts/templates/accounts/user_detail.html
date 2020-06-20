@@ -3,18 +3,18 @@
 {% block content %}
 <div class="container">
   <div class="jumbotron">
-      <h3>{{user.username}}'s Profile</h3>
+      <h3>{{userProfile.user.username}}'s Profile</h3>
       <form enctype="multipart/form-data" method="POST">
          {% csrf_token %}
           <textarea id="user_type" name="user_type" style="display:none;" value={{ userProfile.user_type }}>{{ userProfile.user_type }}</textarea>
-          <p>First name: {{user.first_name}}</p>
-          <p>Last name: {{user.last_name}}</p>
-          <p>Email: {{user.email}}</p>
+          <p>First name: {{userProfile.user.first_name}}</p>
+          <p>Last name: {{userProfile.user.last_name}}</p>
+          <p>Email: {{userProfile.user.email}}</p>
           <p id="birthday">Birthday: {{userProfile.birthday}}</p>
           <p id="provider_name">ProviderName: {{userProfile.provider_name}}</p>
           <p id="address">Address: {{userProfile.address}}</p>
           <p id="phone_number">Phone Number: {{userProfile.phone_number}}</p>
-          <a href="{% url 'accounts:list_recipes' userProfile.id %}">{{user.username}}'s Recipes</a>
+          <a href="{% url 'accounts:list_recipes' userProfile.id %}">{{userProfile.user.username}}'s Recipes</a>
 
   </div>
 </div>

@@ -1,0 +1,60 @@
+{% extends "base.html"%}
+{% load bootstrap3%}
+{% block content %}
+<div class="container">
+  <div class="jumbotron">
+    <form method='POST'>
+      <h3>Search</h3>
+      {% csrf_token %}
+      <div class="form-group">
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Type</span>
+          </div>
+        <select class="form-control" id="type" name="type" required>
+          <option value="user">User</option>
+          <option value="recipe">Recipe</option>
+        </select>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Search term</span>
+            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="term" placeholder="Search for ingredient" name='search'">
+            <button id="search" class="btn btn-outline-primary">Search</button>
+          </div>
+        </div>
+
+      <ul class="list-group">
+            {% for userProfile in userProfiles %}
+            <li class="list-group-item">
+              <a href="{% url 'accounts:detail' userProfile.id %}">{{ userProfile }}</a>
+
+            </li>
+            {% endfor %}
+      </ul>
+
+
+
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function(){
+    $(function(e){
+      updateVisibilityOfFields();
+    })
+	})
+  function updateVisibilityOfFields(){
+    if($("#user_type").val()=="provider"){
+        document.getElementById("birthday").style.display = 'none';
+    }
+    else {
+        document.getElementById("provider_name").style.display = 'none';
+        document.getElementById("address").style.display = 'none';
+        document.getElementById("phone_number").style.display = 'none';
+    }
+  }
+</script>
+{% endblock %}

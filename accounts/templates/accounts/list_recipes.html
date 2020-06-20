@@ -4,144 +4,32 @@
 <div class="container">
   <div class="jumbotron">
     <form method='POST'>
-      <h3>{{username}}'s Recipes</h3>
+      <h3>{{userProfile.user.username}}'s Recipes</h3>
       <div class="form-group">
       {% for recipe in recipes %}
       <div>
-        <a href="{{ recipe.id }}">{{ recipe.title }}</label>
+      {% if request.user ==  userProfile.user  %}
+        <a href="{% url 'accounts:my_recipe_details'  user_profile_id=userProfile.id pk=recipe.id %}">{{ recipe.title }}</label>
+      {% else %}
+        <a href="{% url 'accounts:recipe_details'  user_profile_id=userProfile.id pk=recipe.id %}">{{ recipe.title }}</label>
+      {% endif %}
       </div>
       {% endfor %}
       </div>
-     <div class="form-group">
-      <a href="{% url 'accounts:create_recipe' %}">Create Recipe</a>
-     </div>
+      <div class="form-group">
+         {% if request.user ==  userProfile.user  %}
+             <a href="{% url 'accounts:create_recipe' %}">Create Recipe</a>
+         {% endif %}
+      </div>
       {{errorMessage}}
     </form>
   </div>
 </div>
 
 <script>
-  var dict = {};
-  $(document).ready(function(){
-			$("#search").click(function(e){
-				e.preventDefault();
-				var search_term = $("#term").val();
-				$.ajax({
-					type : 'GET',
-					url : "https://api.nal.usda.gov/fdc/v1/foods/search",
-					data :{ api_key:"hExa857fawOBmDsWG4ii7gpzUqBEDKJ2aGn0nzvx",
-                 query: search_term,
-                 csrfmiddlewaretoken: '{{ csrf_token }}'
-                },
-					success : function(response){
-              var len = response.length;
-              $("#search_results").empty();
-              for( var i = 0; i<50; i++)
-              {
-                var desc = response.foods[i]['description'];
-                var id = response.foods[i]['fdcId'];
-                $("#search_results").append("<option id='"+id+"'>"+desc+"</option>");
-              }
-            },
-            error : function(response){
-              console.log(response)
-            }
-				})
-			})
-      $("#add").click(function(e){
-        e.preventDefault();
-        var search_term = $("#search_results").find('option:selected').attr("id");
-        $.ajax({
-          type : 'GET',
-          url : "https://api.nal.usda.gov/fdc/v1/food/"+search_term,
-          data :{ api_key:"hExa857fawOBmDsWG4ii7gpzUqBEDKJ2aGn0nzvx",
-                 csrfmiddlewaretoken: '{{ csrf_token }}',
-                },
-          success : function(response){
-            var desc = response['description'];
-            var id = response['fdcId'];
-            var amount = $("#amount").find('option:selected').val();
-            var unit = $("#unit").find('option:selected').val();
-            var item=desc+";"+amount+" "+unit;
-            dict[item]=item;
-            addItemToList(item);
-          },
-          error : function(response){
-            console.log(response)
-          }
-        })
-      })
-      $("#remove").click(function(e){
-        e.preventDefault();
-        var remove_term = $("#ingredients").find('option:selected').val();
-        console.log(remove_term);
-        $('#ingredients option:selected').remove();
-      })
-      $(function(e){
-        if($("#unit").val()=="piece")
-        {
-          for (i=1;i<=50;i=i+0.5)
-          {
-            $("#amount").append("<option id='"+i+"'>"+i+"</option>");
-          }
-        }
-        else
-        {
-          for (i=1;i<=2000;i++)
-          {
-            $("#amount").append("<option id='"+i+"'>"+i+"</option>");
-          }
-        }
-      })
 
-	})
-  function unitChangeFunction(){
-    if($("#unit").val()=="piece")
-    {
-      for (i=1;i<=50;i=i+0.5)
-      {
-        $("#amount").append("<option id='"+i+"'>"+i+"</option>");
-      }
-    }
-    else
-    {
-      for (i=1;i<=2000;i++)
-      {
-        $("#amount").append("<option id='"+i+"'>"+i+"</option>");
-      }
-    }
-  }
-  function addItemToList(id) {
-    var $myList = $('#ingList');
-    var $deleteLink = $('<a href="#"> x</a>');
-    $deleteLink.on('click', function(e) {
-      e.preventDefault();
-      $(this).parent().remove();
-      dict.del($(this).val());
-      updateIngList();
-    })
 
-    var $entry = $('<li id="ingList" name="ingList">'+id+'</li>')
-    $entry.append($deleteLink)
-    $myList.append($entry);
-    updateIngList();
-  }
-  function updateIngList()
-  {
-    var temp="";
 
-    for (var key in dict)
-    {
-        // check if the property/key is defined in the object itself, not in parent
-        if (dict.hasOwnProperty(key)) {
-          if(temp=="")
-            temp= dict[key];
-          else
-            temp=temp+"*"+dict[key];
 
-        }
-    }
-    $('#hiddenIngList').val(temp);
-  }
 </script>
 {% endblock %}

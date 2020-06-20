@@ -6,56 +6,163 @@
     <form method='POST'>
       {% csrf_token %}
       <h2>Recipe Details</h2>
-      <p>Recipe Title: {{recipe.title}}</p>
-      <p>Description: {{recipe.description}}</p>
-      <p>Instructions: {{recipe.instructions}}</p>
-      <p>Duration: {{recipe.duration}}</p>
-      <p>Level: {{recipe.level}}</p>
-      <p>Ingredients:</p>
-      <ul id="ingList" name="ingList" ></ul>
-      <p>Nutrients:</p>
-      <p id="nutrientList" name="nutrientList"></p>
-
-      <div class="form-group row text-right">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-          <a class="" href="{% url 'accounts:recipe_update_details' %}" class="btn btn-outline-primary">Update Recipe</a>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text"   id="inputGroup-sizing-default">Title</span>
+          </div>
+          <text type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="title" name="title" readonly>{{recipe.title}} </text>
         </div>
-      </div>
-
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text"   id="inputGroup-sizing-default">Description</span>
+          </div>
+          <text type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="description" name="description" readonly>{{recipe.description}}</text>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text"   id="inputGroup-sizing-default">Instructions</span>
+          </div>
+          <textarea rows="8" cols="80" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="instructions" name="instructions" readonly >{{recipe.instructions}}</textarea>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text"  id="inputGroup-sizing-default">Duration</span>
+          </div>
+            <text type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="duration" name="duration"  readonly>{{recipe.duration}}</text>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" value={{recipe.level}} id="inputGroup-sizing-default">level</span>
+          </div>
+            <text type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="level" name="level"   readonly>{{recipe.level}}</text>
+        </div>
+       <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Ingredients</span>
+          </div>
+          <ul id="ingList" name="ingList" ></ul>
+        </div>
+       <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Nutrients:</span>
+          </div>
+          <ul id="nutrientList" name="nutrientList" ></ul>
+        </div>
 
     </form>
   </div>
 </div>
 
 <script>
+  var ingredientDict = {};
+  var selectedFoodItem={};
+  var keywords=['Energy','Protein','fat','Carbohydrate, by difference','Calcium','Iron','Magnesium', 'B-12','B-6',
+  'Phosphorus','Potassium', 'Vitamin A','Vitamin D']
+  var nutrientDict={'Energy':0,'Protein':0,'Fat':0,'Carbohydrate':0,'Calcium':0,'Iron':0,'Magnesium':0, 'B-12':0,'B-6':0,
+  'Phosphorus':0,'Potassium':0, 'Vitamin A':0,'Vitamin D':0}
+  var nutrientUnits={'Energy':'kcal','Protein':'g','Fat':'g','Carbohydrate':'g','Calcium':'mg','Iron':'mg',
+  'Magnesium':'mg', 'B-12':'mg','B-6':'mg','Phosphorus':'mg','Potassium':'g', 'Vitamin A':'g','Vitamin D':'IU'}
   $(document).ready(function(){
-      $(function(e){
-        var ingredientsWithColon="{{recipe.ingredients}}"
-        var ingredientList = ingredientsWithColon.split("*");
-        var $myList = $('#ingList');
-
-        for (i=0;i<ingredientList.length;i=i+1){
-          var item=ingredientList[i];
-          if(item=="")
-            continue;
-          var ingredientWithoutNutrition=ingredientList[i].split("_");
-          var $entry = $('<li id="ingList" name="ingList">'+ingredientWithoutNutrition[0]+'</li>');
-          $myList.append($entry);
+    $(function(e){
+      var ingredientsWithColon="{{recipe.ingredients}}"
+      var ingredientList = ingredientsWithColon.split("*");
+      var $myList = $('#ingList');
+      for (counter=0;counter<ingredientList.length;counter++){
+        var item=ingredientList[counter];
+        if(item!=""){
+          var selectedFoodItem = JSON.parse(item.replace(/&quot;/g,'"'));
+          ingredientDict[selectedFoodItem["name"]]=selectedFoodItem;
+          addIngredientToList(selectedFoodItem)
         }
-
-        var nutrientsWithSemiColon="{{recipe.nutrients}}"
-        var nutrientsList = nutrientsWithSemiColon.split(";");
-        var $myList = $('#nutrientList');
-
-        for (i=0;i<nutrientsList.length;i=i+1){
-          var item=nutrientsList[i];
-          if(item=="" || item==" ")
-            continue;
-          var $entry = $('<li id="ingList" name="ingList">'+item+'</li>');
-          $myList.append($entry);
-        }
-      })
+      }
+    })
 	})
+  function addIngredientToList(ingredient) {
+    var $myList = $('#ingList');
+    var ing= ingredient["name"]+" "+ingredient["amount"]+" "+ ingredient["unit"];
+    var $entry = $('<li id="ingList" name="ingList">'+ing+'</li>')
+    $myList.append($entry);
+    updateIngList();
+  }
+  function updateIngList(deleteValue){
+    var temp="";
+    nutrientDict={'Energy':0,'Protein':0,'Fat':0,'Carbohydrate':0,'Calcium':0,'Iron':0,'Magnesium':0, 'B-12':0,'B-6':0,
+    'Phosphorus':0,'Potassium':0, 'Vitamin A':0,'Vitamin D':0}
+    var nutrientsTotal="";
+    for (var key in ingredientDict){
+      //ingredient part
+        if (ingredientDict.hasOwnProperty(key)){
+          if(deleteValue==null || deleteValue==undefined){
+            if(temp=="")
+              temp=JSON.stringify(ingredientDict[key]);
+            else
+              temp=temp+"*"+JSON.stringify(ingredientDict[key]);
+          }
+          else{
+            if(deleteValue.includes(key))
+              delete ingredientDict[key];
+          }
+        }
+      //nutrientPart
+      if(ingredientDict!==null && ingredientDict!==undefined && ingredientDict.hasOwnProperty(key)){
+        for(u=0;u<ingredientDict[key]["nutrientsList"].length;u++) {
+          var nutrient=ingredientDict[key]["nutrientsList"][u];
+          var name=nutrient["nutrientName"];
+          var amount=Number(nutrient["nutrientAmount"]).toFixed(2);
+          var unit=nutrient["unit"];
 
+          if(nutrientDict.hasOwnProperty(name)){
+            var value=Number(nutrientDict[name])+Number(amount);
+            nutrientDict[name]=value.toFixed(2);
+            nutrientUnits[name]=unit;
+          }
+        }
+      }
+    }
+    $('#nutrientList').empty();
+    var $myList = $('#nutrientList');
+    for(var n in nutrientDict){
+      if(nutrientsTotal=="")
+        nutrientsTotal=n+" "+nutrientDict[n]+" "+nutrientUnits[n]+"; ";
+      else
+        nutrientsTotal+=n+" "+nutrientDict[n]+" "+nutrientUnits[n]+"; ";
+      var $entry = $('<li id="ingList" name="ingList">'+n+" "+nutrientDict[n]+" "+nutrientUnits[n]+'</li>');
+      $myList.append($entry);
+    }
+    $('#nutrientsTotal').val(nutrientsTotal);
+    $('#hiddenIngList').val(temp);
+  }
+  function getNutrientName(nutrientName,unit){
+    for (g=0;g<keywords.length;g++){
+      var str=keywords[g];
+        if (nutrientName.includes(str)){
+          if(str=="fat")
+            str= "Fat";
+          else if(str=="Carbohydrate, by difference")
+            str="Carbohydrate";
+          else if(str=="Vitamin A")
+              str="VitaminA";
+          else if(str=="Vitamin D")
+                  str="VitaminD";
+          //else if(str=="Energy" && unit!="kcal")
+          //  str="";
+          return str;
+        }
+    }
+    return "";
+  }
+  function convertNutritions(nutrientsList,gramValue){
+    var multiplier=gramValue/100;
+    var newNutrientItem={};
+    var newListNutrients=[];
+    for(c=0;c<nutrientsList.length;c++){
+      var nutrientName=nutrientsList[c]["nutrientName"];
+      var amount= nutrientsList[c]["nutrientAmount"]*multiplier;
+      var unit=nutrientsList[c]["unit"];
+      newNutrientItem={"nutrientName":nutrientName,"nutrientAmount":amount.toFixed(2),"unit":unit}
+      newListNutrients.push(newNutrientItem);
+    }
+    return newListNutrients;
+  }
 </script>
 {% endblock %}
