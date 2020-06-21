@@ -35,6 +35,37 @@ class Recipe(models.Model):
 class Comment(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    description=models.CharField(max_length=1000,default="")
+    def __str__(self):
+        return self.description
+
+class Like(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     description=models.CharField(max_length=50,default="")
     def __str__(self):
         return self.description
+
+class Menu(models.Model):
+    title = models.CharField(max_length=50, default="")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.title
+
+
+class Meal(models.Model):
+    recipe = models.OneToOneField(Recipe, on_delete=models.CASCADE)
+    title = models.CharField(max_length=50,default="")
+    menu=models.ForeignKey(Menu, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.title
+
+class LikeForMenu(models.Model):
+    menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    description=models.CharField(max_length=50,default="")
+    def __str__(self):
+        return self.description
+
+
+

@@ -6,10 +6,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .models import Recipe, UserProfileInfo, Comment
+from .models import Recipe, UserProfileInfo, Comment, Like
 from django.contrib.auth.models import User
 from django.db.models import Q
-from django.views.generic import (ListView, DetailView,CreateView )
+from django.views.generic import (ListView, DetailView)
 from django.shortcuts import redirect
 
 
@@ -194,10 +194,6 @@ class RecipeListView(ListView):
 
 
 def search_list(request):
-    """
-    Renders the polls_list.html template which lists all the
-    currently available polls
-    """
     userProfiles = UserProfileInfo.objects.all()
     recipes = Recipe.objects.all()
     displayUser = False
@@ -218,37 +214,8 @@ def search_list(request):
                    'displayRecipe': displayRecipe})
 
 
-'''
-    if 'text' in request.GET:
-        polls = polls.order_by('text')
-
-    if 'pub_date' in request.GET:
-        polls = polls.order_by('-pub_date')
-
-    if 'num_votes' in request.GET:
-        polls = polls.annotate(Count('vote')).order_by('-vote__count')
-
-    if 'search' in request.GET:
-        search_term = request.GET['search']
-        polls = polls.filter(text__icontains=search_term)
-
-    paginator = Paginator(polls, 5)
-
-    page = request.GET.get('page')
-    polls = paginator.get_page(page)
-
-    get_dict_copy = request.GET.copy()
-    params = get_dict_copy.pop('page', True) and get_dict_copy.urlencode()
-'''
-
-
 def user_detail(request, user_profile_id):
-    """
-    Render the poll_detail.html template which allows a user to vote
-    on the choices of a poll
-    """
     userProfile = UserProfileInfo.objects.get(id=user_profile_id)
-
     return render(request, 'accounts/user_detail.html', {'userProfile': userProfile})
 
 
@@ -280,7 +247,7 @@ class RecipeDetailView(DetailView):
                 recipe.ingredients = request.POST.get('hiddenIngList')
                 recipe.nutrients = request.POST.get('nutrientsTotal')
                 if recipe.ingredients is None:
-                    error_Message = "First select ingredients!"
+                    errorMessage = "First select ingredients!"
                 else:
                     if request.POST.get("Update"):
                         recipe.save()
@@ -300,6 +267,7 @@ class RecipeJustDetailView(DetailView):
             id = self.kwargs.get('pk')
             recipe = Recipe.objects.get(pk=id)
             comments = Comment.objects.filter(recipe=recipe)
+
             if recipe is None:
                 errorMessage = "No recipe is created!"
         return render(request, 'accounts/recipe_just_details.html',
@@ -307,7 +275,6 @@ class RecipeJustDetailView(DetailView):
                        'errorMessage': errorMessage,
                        'comments': comments,
                        })
-
 
 class MyProfileView(DetailView):
     def get(self, request, **kwargs):
@@ -327,31 +294,54 @@ class MyProfileView(DetailView):
                        })
 
 
-def add_comment(request,user_id,recipe_id):
-        errorMessage=""
-        recipe = Recipe.objects.get(pk=recipe_id)
-        user = User.objects.get(pk=user_id)
-        if request.method == "POST":
-            comments = Comment.objects.filter(recipe=recipe)
-            description = request.POST['comment']
-            if description is not None:
-                alreadyAddedComments = Comment.objects.filter(Q(description=description) , Q(user=user),Q(recipe=recipe))
-                if alreadyAddedComments.count()==0:
-                    Comment.objects.create(user=user, recipe=recipe, description=description)
-                    comments = Comment.objects.filter(recipe=recipe)
-                return render(request, 'accounts/recipe_just_details.html',
-                              {'recipe': recipe,
-                               'errorMessage': errorMessage,
-                               'comments': comments,
-                               })
+def add_comment(request, user_id, recipe_id):
+    errorMessage = ""
+    recipe = Recipe.objects.get(pk=recipe_id)
+    user = User.objects.get(pk=user_id)
+    likes=Like.objects.filter(recipe=recipe)
+    if request.method == "POST":
+        comments = Comment.objects.filter(recipe=recipe)
+        description = request.POST['comment']
+        if description is not None:
+            alreadyAddedComments = Comment.objects.filter(Q(description=description), Q(user=user), Q(recipe=recipe))
+            if alreadyAddedComments.count() == 0:
+                Comment.objects.create(user=user, recipe=recipe, description=description)
+                comments = Comment.objects.filter(recipe=recipe)
             return render(request, 'accounts/recipe_just_details.html',
                           {'recipe': recipe,
                            'errorMessage': errorMessage,
                            'comments': comments,
+                           'likes': likes
                            })
-
-        return render(request, 'accounts/add_comment.html',
+        return render(request, 'accounts/recipe_just_details.html',
                       {'recipe': recipe,
                        'errorMessage': errorMessage,
-                       'user': user,
+                       'comments': comments,
+                       'likes':likes
                        })
+
+    return render(request, 'accounts/add_comment.html',
+                  {'recipe': recipe,
+                   'errorMessage': errorMessage,
+                   'user': user,
+                   })
+
+def like(request, user_id, recipe_id):
+    errorMessage = ""
+    recipe = Recipe.objects.get(pk=recipe_id)
+    user = User.objects.get(pk=user_id)
+    comments=Comment.objects.filter(recipe=recipe)
+    likes=Like.objects.filter(recipe=recipe)
+    if request.method == "GET":
+        alreadyGivenLikes= Like.objects.filter( Q(user=user),Q(recipe=recipe))
+        if alreadyGivenLikes.count() == 0:
+            Like.objects.create(user=user, recipe=recipe, description="description")
+            likes = Like.objects.filter(recipe=recipe)
+
+    return render(request, 'accounts/recipe_just_details.html',
+                              {'recipe': recipe,
+                               'errorMessage': errorMessage,
+                               'comments': comments,
+                               'likes': likes
+                               })
+

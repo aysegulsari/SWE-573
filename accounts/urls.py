@@ -17,5 +17,6 @@ urlpatterns=[
     path('myrecipe_details/<int:user_profile_id>/<int:pk>',RecipeDetailView.as_view(),name='my_recipe_details'),
     path('recipe_details/<int:user_profile_id>/<int:pk>', RecipeJustDetailView.as_view(), name='recipe_details'),
     path('add_comment/<int:user_id>/<int:recipe_id>',views.add_comment, name='add_comment'),
+    path('like/<int:user_id>/<int:recipe_id>',views.like, name='like'),
     path('detail/<int:user_profile_id>/', views.user_detail, name='detail'),
 ]
