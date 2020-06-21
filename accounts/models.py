@@ -31,3 +31,10 @@ class Recipe(models.Model):
     #ingredients = models.OneToOneField('Ingredient', on_delete=models.CASCADE)
     def __str__(self):
         return self.title
+
+class Comment(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    description=models.CharField(max_length=50,default="")
+    def __str__(self):
+        return self.description

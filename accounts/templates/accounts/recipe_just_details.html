@@ -49,6 +49,19 @@
           <ul id="nutrientList" name="nutrientList" ></ul>
         </div>
 
+        <h4 id="comment_header">Comments:</h4>
+        <ul class="list-group" id="recipe_list">
+           {% for comment in comments %}
+                  <div>
+                     {{ comment.user.username }} : {{ comment.description }}
+                  </div>
+              {% endfor %}
+
+       <a href="{% url 'accounts:add_comment' user_id=request.user.id recipe_id=recipe.id %}">Add comment</a>
+
+
+
+
     </form>
   </div>
 </div>
