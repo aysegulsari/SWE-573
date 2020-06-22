@@ -79,6 +79,8 @@ def user_login(request):
 
 def edit_user_profile(request):
     isUpdated = False
+    user=request.user
+    userProfile=UserProfileInfo.objects.get(user=user)
     if request.method == 'POST':
         edit_profile_form = EditProfileForm(data=request.POST, instance=request.user)
 
@@ -95,6 +97,8 @@ def edit_user_profile(request):
 
     return render(request, 'accounts/editProfil.html',
                   {'edit_profile_form': edit_profile_form,
+                   'user':user,
+                   'userProfile':userProfile,
                    'isUpdated': isUpdated})
 
 
