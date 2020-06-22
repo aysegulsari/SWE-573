@@ -47,16 +47,18 @@ class Like(models.Model):
         return self.description
 
 class Menu(models.Model):
-    title = models.CharField(max_length=50, default="")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=50, default="")
     def __str__(self):
         return self.title
 
 
 class Meal(models.Model):
-    recipe = models.OneToOneField(Recipe, on_delete=models.CASCADE)
+    recipe_id = models.IntegerField(default=0)
     title = models.CharField(max_length=50,default="")
+    menu_title=models.CharField(max_length=50,default="")
     menu=models.ForeignKey(Menu, on_delete=models.CASCADE)
+
     def __str__(self):
         return self.title
 

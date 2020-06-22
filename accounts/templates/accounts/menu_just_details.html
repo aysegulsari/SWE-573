@@ -1,0 +1,32 @@
+{% extends "base.html"%}
+{% load bootstrap3%}
+{% block content %}
+    <div class="container">
+        <div class="jumbotron">
+            {% csrf_token %}
+            <h2>Menu Details</h2>
+            <div class="form-group">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-default">Title</span>
+                    </div>
+                    <input type="text"  value="{{ menu.title }}" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="title" name="title" readonly>
+                </div>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-default">Recipes in the menu</span>
+                    </div>
+                    <ul id="like_list">
+                        {% for meal in meals %}
+                            <div>
+                                <li> {{ meal.title }}</li>
+                            </div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+    </div>
+
+
+{% endblock %}

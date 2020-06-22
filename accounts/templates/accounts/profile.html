@@ -14,8 +14,12 @@
           <p id="provider_name">ProviderName: {{userProfile.provider_name}}</p>
           <p id="address">Address: {{userProfile.address}}</p>
           <p id="phone_number">Phone Number: {{userProfile.phone_number}}</p>
-          <a href="{% url 'accounts:list_recipes' userProfile.id %}">{{user.username}}'s Recipes</a>
-
+          <div>
+              <a href="{% url 'accounts:list_recipes' userProfile.id %}">{{user.username}}'s Recipes</a>
+          </div>
+          <div>
+              <a href="{% url 'accounts:list_menus' userProfile.id %}">{{user.username}}'s Menus</a>
+          </div>
   </div>
 </div>
 
