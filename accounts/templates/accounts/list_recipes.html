@@ -1,35 +1,39 @@
 {% extends "base.html"%}
 {% load bootstrap3%}
 {% block content %}
-<div class="container">
-  <div class="jumbotron">
-    <form method='POST'>
-      <h3>{{userProfile.user.username}}'s Recipes</h3>
-      <div class="form-group">
-      {% for recipe in recipes %}
-      <div>
-      {% if request.user ==  userProfile.user  %}
-        <a href="{% url 'accounts:my_recipe_details'  user_profile_id=userProfile.id pk=recipe.id %}">{{ recipe.title }}</label>
-      {% else %}
-        <a href="{% url 'accounts:recipe_details'  user_profile_id=userProfile.id pk=recipe.id %}">{{ recipe.title }}</label>
-      {% endif %}
-      </div>
-      {% endfor %}
-      </div>
-      <div class="form-group">
-         {% if request.user ==  userProfile.user  %}
-             <a href="{% url 'accounts:create_recipe' %}">Create Recipe</a>
-         {% endif %}
-      </div>
-      {{errorMessage}}
-    </form>
-  </div>
-</div>
+    <div class="container">
+        <div class="jumbotron">
+            <form method='POST'>
+                {% if isConsumer  %}
+                    <h3>{{userProfile.user.username}}'s Recipes</h3>
+                {% else %}
+                    <h3>{{userProfile.provider_name}}'s Recipes</h3>
+                {% endif %}
+                <div class="form-group">
+                    {% for recipe in recipes %}
+                        <div>
+                            {% if request.user ==  userProfile.user  %}
+                                <a href="{% url 'accounts:my_recipe_details'  user_profile_id=userProfile.id pk=recipe.id %}">{{ recipe.title }}</a>
+                            {% else %}
+                                <a href="{% url 'accounts:recipe_details'  user_profile_id=userProfile.id pk=recipe.id %}">{{ recipe.title }}</a>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    {% if request.user ==  userProfile.user  %}
+                        <a href="{% url 'accounts:create_recipe' %}">Create Recipe</a>
+                    {% endif %}
+                </div>
+                {{errorMessage}}
+            </form>
+        </div>
+    </div>
 
-<script>
+    <script>
 
 
 
 
-</script>
+    </script>
 {% endblock %}

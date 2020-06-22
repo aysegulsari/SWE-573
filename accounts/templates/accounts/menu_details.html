@@ -2,55 +2,50 @@
 {% load bootstrap3%}
 {% block content %}
     <div class="container">
-        <div class="jumbotron">
-            <form method='POST'>
-                {% csrf_token %}
-                <h2>Menu Details</h2>
-                <div class="form-group">
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="inputGroup-sizing-default">Title</span>
-                        </div>
-                        <input type="text"  value="{{ menu.title }}" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="title" name="title" required>
-                    </div>
-
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="inputGroup-sizing-default">Recipes in the menu</span>
-                        </div>
-                        <ul id="like_list">
-                            {% for meal in meals %}
-                                <div>
-                                    <li> {{ meal.title }}</li>
-                                </div>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="inputGroup-sizing-default">Your Recipes</span>
-                        </div>
-                    <select class="form-control" name="recipeid" >
-                        <option value="0">Select recipe to add your menu</option>
-                        {% for recipe in recipes %}
-                            <div>
-                                <option value="{{ recipe.id }}">{{ recipe.title }}</option>
-                            </div>
-                        {% endfor %}
-                        <input type="submit" class="btn btn-outline-primary" name="AddRecipe" value="AddRecipe"></input>
-                    </div>
-
-
-                    <div class="input-group mb-3">
-                        <div class="form-group row text-right">
-                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                <input type="submit" class="btn btn-outline-primary" name="Update" value="Update"></input>
-                               <!-- <input type="submit" class="btn btn-outline-primary" name="Delete" value="Delete"></input> -->
-                            </div>
-                        </div>
-            </form>
+    <div class="jumbotron">
+    <form method="POST">
+    {% csrf_token %}
+    <h2>Menu Details</h2>
+    <div class="form-group">
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup-sizing-default">Title</span>
+            </div>
+            <input type="text" maxlength="50" value="{{ menu.title }}" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="title" name="title" required>
         </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup-sizing-default">Recipes in the menu</span>
+            </div>
+            <ul id="like_list">
+                {% for meal in meals %}
+                    <div>
+                        <li> {{ meal.title }}</li>
+                    </div>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Your Recipes</span>
+            <select class="form-control" name="recipe_id">
+                <option value="0">Select recipe to add your menu</option>
+                {% for recipe in recipes %}
+                    <div>
+                        <option value="{{ recipe.id }}">{{ recipe.title }}</option>
+                    </div>
+                {% endfor %}
+                <input type="submit" class="btn btn-outline-primary" name="AddRecipe" value="AddRecipe">
+        </div>
+        <div class="input-group mb-3">
+            <div class="form-group row text-right">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                    <input type="submit" class="btn btn-outline-primary" name="Update" value="Update">
+                    <!-- <input type="submit" class="btn btn-outline-primary" name="Delete" value="Delete"></input> -->
+                </div>
+            </div>
+        </div>
+        {%if isUpdated %}
+            <h6>Your menu is updated!</h6>
+        {%endif%}
     </div>
-
-
 {% endblock %}

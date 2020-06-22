@@ -1,94 +1,93 @@
 {% extends "base.html"%}
 {% load bootstrap3%}
 {% block content %}
-<div class="container">
-  <div class="jumbotron">
-    <form method='GET'>
-      <h3>Search</h3>
-      {% csrf_token %}
-      <div class="form-group">
-        <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-default">Type</span>
-          </div>
-        <select class="form-control" id="type" name="type" onchange="onChangeType(this.value)"  required>
-        {%if displayUser  %}
-          <option value="user">User</option>
-          <option value="recipe">Recipe</option>
-        {%elif displayRecipe %}
-           <option value="recipe">Recipe</option>
-          <option value="user">User</option>
-            {%else%}
-            <option value="user">User</option>
-          <option value="recipe">Recipe</option>
-      {% endif %}
-
-        </select>
+    <div class="container">
+        <div class="jumbotron">
+            <form method='GET'>
+                <h3>Search</h3>
+                {% csrf_token %}
+                <div class="form-group">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">Type</span>
+                        </div>
+                        <select class="form-control" id="type" name="type" onchange="onChangeType(this.value)" required>
+                            {%if displayUser  %}
+                                <option value="user">User</option>
+                                <option value="recipe">Recipe</option>
+                            {%elif displayRecipe %}
+                                <option value="recipe">Recipe</option>
+                                <option value="user">User</option>
+                            {%else%}
+                                <option value="user">User</option>
+                                <option value="recipe">Recipe</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">Search term</span>
+                            <input type="text" maxlength="50" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="term" placeholder="Search" name='search' value="{{search_term}}">
+                            <button id="search" class="btn btn-outline-primary">Search</button>
+                        </div>
+                    </div>
+                    {%if displayUser  %}
+                        <h3 id="user_header">Users</h3>
+                        <ul class="list-group" id="user_list">
+                            {% for userProfile in userProfiles %}
+                                <li class="list-group-item">
+                                    {% if userProfile.user_type == "consumer"  %}
+                                        <a href="{% url 'accounts:detail' userProfile.id %}">{{ userProfile }}</a>
+                                    {% else %}
+                                        <a href="{% url 'accounts:detail' userProfile.id %}">{{ userProfile.provider_name }}</a>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {%elif displayRecipe %}
+                        <h3 id="recipe_header">Recipes</h3>
+                        <ul class="list-group" id="recipe_list">
+                            {% for recipe in recipes %}
+                                <div>
+                                    {% if request.user ==  recipe.user  %}
+                                        <a href="{% url 'accounts:my_recipe_details'  user_profile_id=request.user.id pk=recipe.id %}">{{ recipe.title }}</a>
+                                    {% else %}
+                                        <a href="{% url 'accounts:recipe_details'  user_profile_id=recipe.user.id pk=recipe.id %}">{{ recipe.title }}</a>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </form>
         </div>
-        <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-default">Search term</span>
-            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="term" placeholder="Search for ingredient" name='search' value="{{search_term}}">
-            <button id="search" class="btn btn-outline-primary">Search</button>
-          </div>
-        </div>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(function(e){
+                onChangeType();
+            })
+        })
+        function onChangeType(){
+            if($("#type").val()=="user"){
+                $("#term").empty();
+                recipe_head=document.getElementById("recipe_header");
+                recipe_list=document.getElementById("recipe_list");
+                if(typeof(recipe_head) != 'undefined' && recipe_head != null)
+                    recipe_head.innerHTML="Users";
+                if(typeof(recipe_list) != 'undefined' && recipe_list != null)
+                    $("#recipe_list").empty();
 
-      {%if displayUser  %}
-      <h3 id="user_header">Users</h3>
-      <ul class="list-group" id="user_list">
-          {% for userProfile in userProfiles %}
-              <li class="list-group-item">
-                  <a href="{% url 'accounts:detail' userProfile.id %}">{{ userProfile }}</a>
-              </li>
-          {% endfor %}
-      </ul>
-      {%elif displayRecipe %}
-      <h3 id="recipe_header">Recipes</h3>
-          <ul class="list-group" id="recipe_list">
-              {% for recipe in recipes %}
-                  <div>
-                      {% if request.user ==  recipe.user  %}
-                          <a href="{% url 'accounts:my_recipe_details'  user_profile_id=request.user.id pk=recipe.id %}">{{ recipe.title }}</a>
-                      {% else %}
-                          <a href="{% url 'accounts:recipe_details'  user_profile_id=recipe.user.id pk=recipe.id %}">{{ recipe.title }}</a>
-                      {% endif %}
-                  </div>
-              {% endfor %}
-          </ul>
-      {% endif %}
-      </div>
-    </form>
-  </div>
-</div>
-
-
-<script type="text/javascript">
-  $(document).ready(function(){
-    $(function(e){
-      onChangeType();
-    })
-	})
-  function onChangeType(){
-    if($("#type").val()=="user"){
-        $("#term").empty();
-        recipe_head=document.getElementById("recipe_header");
-        recipe_list=document.getElementById("recipe_list");
-        if(typeof(recipe_head) != 'undefined' && recipe_head != null)
-            recipe_head.innerHTML="Users";
-        if(typeof(recipe_list) != 'undefined' && recipe_list != null)
-            $("#recipe_list").empty();
-
-    }
-    else {
-        $("#term").empty();
-        user_head=document.getElementById("user_header");
-        user_list=document.getElementById("user_list");
-        if(typeof(user_head) != 'undefined' && user_head != null)
-            user_head.innerHTML="Recipes";
-        if(typeof(user_list) != 'undefined' && user_list != null)
-            $("#user_list").empty();
-    }
-  }
-</script>
-
+            }
+            else {
+                $("#term").empty();
+                user_head=document.getElementById("user_header");
+                user_list=document.getElementById("user_list");
+                if(typeof(user_head) != 'undefined' && user_head != null)
+                    user_head.innerHTML="Recipes";
+                if(typeof(user_list) != 'undefined' && user_list != null)
+                    $("#user_list").empty();
+            }
+        }
+    </script>
 {% endblock %}

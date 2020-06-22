@@ -4,7 +4,11 @@
     <div class="container">
         <div class="jumbotron">
             <form method='POST'>
-                <h3>{{userProfile.user.username}}'s Menus</h3>
+                {% if userProfile.user_type == "consumer" %}
+                    <h3>{{userProfile.user.username}}'s Menus</h3>
+                {% else %}
+                    <h3>{{userProfile.provider_name}}'s Menus</h3>
+                {% endif %}
                 <div class="form-group">
                     {% for menu in menus %}
                         <div>
@@ -25,11 +29,4 @@
             </form>
         </div>
     </div>
-
-    <script>
-
-
-
-
-    </script>
 {% endblock %}

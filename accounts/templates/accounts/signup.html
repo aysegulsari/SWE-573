@@ -1,127 +1,125 @@
 {% extends "base.html"%}
 {% load bootstrap3%}
 {% block content %}
-<div class="container">
-  <div class="jumbotron">
-    {% if registered %}
-      <h3>Thank you for registering!</h3>
-    {% else %}
-      <h3>Sign Up</h3>
-      <form enctype="multipart/form-data" method="POST">
-        {% csrf_token %}
-        <div class="form-group">
+    <div class="container">
+        <div class="jumbotron">
+            {% if registered %}
+                <h3>Thank you for registering!</h3>
+            {% else %}
+                <h3>Sign Up</h3>
+                <form enctype="multipart/form-data" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
 
-          <div class="input-group mb-3">
-            <div class="input-group-prepend">
-              <span class="input-group-text"   id="inputGroup-sizing-default">Username</span>
-            </div>
-            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="username" name="username">
-          </div>
-          <div class="input-group mb-3">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="inputGroup-sizing-default">First Name</span>
-            </div>
-            <input type="text" class="form-control" aria-label="Default" required="required" aria-describedby="inputGroup-sizing-default" id="first_name" name="first_name">
-          </div>
-          <div class="input-group mb-3">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="inputGroup-sizing-default">Last Name</span>
-            </div>
-            <input type="text" class="form-control" aria-label="Default" required="required" aria-describedby="inputGroup-sizing-default" id="last_name" name="last_name">
-          </div>
-          <div class="input-group mb-3">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="inputGroup-sizing-default">Email</span>
-            </div>
-            <input type="email" class="form-control" aria-label="Default" required="required" aria-describedby="inputGroup-sizing-default" id="email" name="email">
-          </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Username</span>
+                            </div>
+                            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="username" name="username">
+                        </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroup-sizing-default">First Name</span>
+                            </div>
+                            <input type="text" class="form-control" aria-label="Default" required="required" aria-describedby="inputGroup-sizing-default" id="first_name" name="first_name">
+                        </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Last Name</span>
+                            </div>
+                            <input type="text" class="form-control" aria-label="Default" required="required" aria-describedby="inputGroup-sizing-default" id="last_name" name="last_name">
+                        </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Email</span>
+                            </div>
+                            <input type="email" class="form-control" aria-label="Default" required="required" aria-describedby="inputGroup-sizing-default" id="email" name="email">
+                        </div>
 
-          <div class="input-group mb-3">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="inputGroup-sizing-default">Password</span>
-            </div>
-            <input type="password" class="form-control" placeholder="Username" aria-label="Default" required="required" aria-describedby="inputGroup-sizing-default" id="password" name="password">
-          </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Password</span>
+                            </div>
+                            <input type="password" class="form-control" placeholder="Username" aria-label="Default" required="required" aria-describedby="inputGroup-sizing-default" id="password" name="password">
+                        </div>
 
-          <div class="input-group mb-3">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="inputGroup-sizing-default">User Type</span>
-            </div>
-            <select class="form-control" id="user_type" name="user_type" onchange="updateVisibilityOfFields(this.value)">
-              <option value="consumer">consumer</option>
-              <option value="provider">provider</option>
-            </select>
-          </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroup-sizing-default">User Type</span>
+                            </div>
+                            <select class="form-control" id="user_type" name="user_type" onchange="updateVisibilityOfFields(this.value)">
+                                <option value="consumer">consumer</option>
+                                <option value="provider">provider</option>
+                            </select>
+                        </div>
 
-          <div class="input-group mb-3">
-            <div for="birthday" class="input-group-prepend" >
-              <span for="birthday" class="input-group-text" id="inputGroup-sizing-default">Birthday</span>
-            </div>
-            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="birthday" name="birthday">
-          </div>
+                        <div class="input-group mb-3">
+                            <div for="birthday" class="input-group-prepend" >
+                                <span for="birthday" class="input-group-text" id="inputGroup-sizing-default">Birthday</span>
+                            </div>
+                            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="birthday" name="birthday">
+                        </div>
 
-          <div class="input-group mb-3" >
-              <div class="input-group-prepend" >
-              <span class="input-group-text" id="inputGroup-sizing-default">Provider Name</span>
-            </div>
-            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="provider_name" name="provider_name">
-          </div>
+                        <div class="input-group mb-3" >
+                            <div class="input-group-prepend" >
+                                <span class="input-group-text" id="inputGroup-sizing-default">Provider Name</span>
+                            </div>
+                            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="provider_name" name="provider_name">
+                        </div>
 
-          <div class="input-group mb-3" >
-            <div class="input-group-prepend" >
-              <span class="input-group-text" id="inputGroup-sizing-default">Address</span>
-            </div>
-            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="address" name="address">
-          </div>
+                        <div class="input-group mb-3" >
+                            <div class="input-group-prepend" >
+                                <span class="input-group-text" id="inputGroup-sizing-default">Address</span>
+                            </div>
+                            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="address" name="address">
+                        </div>
 
-          <div class="input-group mb-3" >
-            <div class="input-group-prepend" >
-              <span class="input-group-text" id="inputGroup-sizing-default">Phone Number</span>
-            </div>
-            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="phone_number" name="phone_number">
-          </div>
+                        <div class="input-group mb-3" >
+                            <div class="input-group-prepend" >
+                                <span class="input-group-text" id="inputGroup-sizing-default">Phone Number</span>
+                            </div>
+                            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="phone_number" name="phone_number">
+                        </div>
 
-
-        <div class="form-group row text-right">
-          <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-            <input type="submit" class="btn btn-outline-primary" value="Register"></input>
-          </div>
+                        <div class="form-group row text-right">
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                <input type="submit" class="btn btn-outline-primary" value="Register">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                {{errorMessage}}
+            {% endif %}
         </div>
-        </div>
-      </form>
-      {{errorMessage}}
-    {% endif %}
-  </div>
-</div>
+    </div>
 
-<script type="text/javascript">
-  $(document).ready(function(){
-    $(function(e){
-      updateVisibilityOfFields();
-    })
-	})
-  function updateVisibilityOfFields(){
-    if($("#user_type").val()=="provider"){
-        $("#birthday").val("-");
-        $("#phone_number").val(" ");
-        $("#address").val(" ");
-        $("#provider_name").val(" ");
-        document.getElementById("birthday").readOnly = true;
-        document.getElementById("phone_number").readOnly =false;
-        document.getElementById("address").readOnly =false;
-        document.getElementById("provider_name").readOnly =false;
-    }
-    else {
-        $("#birthday").val(" ");
-        $("#phone_number").val("-");
-        $("#address").val("-");
-        $("#provider_name").val("-");
-      document.getElementById("birthday").readOnly=false;
-      document.getElementById("phone_number").readOnly= true;
-      document.getElementById("address").readOnly= true;
-      document.getElementById("provider_name").readOnly= true;
-    }
-  }
-</script>
-
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(function(e){
+                updateVisibilityOfFields();
+            })
+        })
+        function updateVisibilityOfFields(){
+            if($("#user_type").val()=="provider"){
+                $("#birthday").val("-");
+                $("#phone_number").val(" ");
+                $("#address").val(" ");
+                $("#provider_name").val(" ");
+                document.getElementById("birthday").readOnly = true;
+                document.getElementById("phone_number").readOnly =false;
+                document.getElementById("address").readOnly =false;
+                document.getElementById("provider_name").readOnly =false;
+            }
+            else {
+                $("#birthday").val(" ");
+                $("#phone_number").val("-");
+                $("#address").val("-");
+                $("#provider_name").val("-");
+                document.getElementById("birthday").readOnly=false;
+                document.getElementById("phone_number").readOnly= true;
+                document.getElementById("address").readOnly= true;
+                document.getElementById("provider_name").readOnly= true;
+            }
+        }
+    </script>
 {% endblock %}

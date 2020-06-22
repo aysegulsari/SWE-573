@@ -8,25 +8,25 @@
                 <h2>Recipe Details</h2>
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                        <span class="input-group-text"   id="inputGroup-sizing-default">Title</span>
+                        <span class="input-group-text" id="inputGroup-sizing-default">Title</span>
                     </div>
                     <text type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="title" name="title" readonly>{{recipe.title}} </text>
                 </div>
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                        <span class="input-group-text"   id="inputGroup-sizing-default">Description</span>
+                        <span class="input-group-text" id="inputGroup-sizing-default">Description</span>
                     </div>
                     <text type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="description" name="description" readonly>{{recipe.description}}</text>
                 </div>
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                        <span class="input-group-text"   id="inputGroup-sizing-default">Instructions</span>
+                        <span class="input-group-text" id="inputGroup-sizing-default">Instructions</span>
                     </div>
                     <textarea rows="8" cols="80" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="instructions" name="instructions" readonly >{{recipe.instructions}}</textarea>
                 </div>
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                        <span class="input-group-text"  id="inputGroup-sizing-default">Duration</span>
+                        <span class="input-group-text" id="inputGroup-sizing-default">Duration</span>
                     </div>
                     <text type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="duration" name="duration"  readonly>{{recipe.duration}}</text>
                 </div>
@@ -62,17 +62,21 @@
                         <a href="{% url 'accounts:add_comment' user_id=request.user.id recipe_id=recipe.id %}">Add comment</a>
                     </ul>
                 </div>
-
-
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-sizing-default">Users who like this recipe</span>
                     </div>
                     <ul id="like_list">
                         {% for like in likes %}
+                            {% if like.user_profile.user_type == "consumer" %}
                             <div>
-                                <li> {{ like.user.username }}</li>
+                                <li> {{ like.user_profile.user.username }}</li>
                             </div>
+                            {% else %}
+                            <div>
+                                <li> {{ like.user_profile.provider_name }}</li>
+                            </div>
+                            {% endif %}
                         {% endfor %}
                         <a href="{% url 'accounts:like' user_id=request.user.id recipe_id=recipe.id %}">Like</a>
                     </ul>
