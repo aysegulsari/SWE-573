@@ -4,14 +4,11 @@ from .forms import UserForm, UserProfileInfoForm, EditProfileForm, CreateRecipeF
 from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect
-from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .models import Recipe, UserProfileInfo, Comment, Like, Menu, Meal
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.views.generic import (ListView, DetailView)
-from django.shortcuts import redirect
-from django.http import QueryDict
 
 
 @login_required
@@ -28,7 +25,6 @@ def register(request):
     if request.method == 'POST':
         user_form = UserForm(data=request.POST)
         profile_form = UserProfileInfoForm(data=request.POST)
-
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save()
             password = request.POST.get('password')
@@ -50,7 +46,8 @@ def register(request):
                   {'user_form': user_form,
                    'profile_form': profile_form,
                    'registered': registered,
-                   'error_Message': errorMessage})
+                   'error_Message': errorMessage
+                   })
 
 
 def user_login(request):
@@ -60,7 +57,6 @@ def user_login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(username=username, password=password)
-
         if user:
             if user.is_active:
                 login(request, user)
@@ -72,55 +68,60 @@ def user_login(request):
         else:
             loginFailed = True
             errorMessage = "Invalid login,check your username and password!"
-
     return render(request, 'accounts/login.html', {'loginFailed': loginFailed,
-                                                   'errorMessage': errorMessage})
+                                                   'errorMessage': errorMessage
+                                                   })
 
 
 def edit_user_profile(request):
     isUpdated = False
-    user=request.user
-    userProfile=UserProfileInfo.objects.get(user=user)
+    user = request.user
+    userProfile = UserProfileInfo.objects.get(user=user)
     if request.method == 'POST':
         edit_profile_form = EditProfileForm(data=request.POST, instance=request.user)
-
         if edit_profile_form.is_valid():
             edit_profile_form.save()
             isUpdated = True
 
         else:
             print(edit_profile_form.errors)
+        '''
+        user.username=request.POST['username']
+        user.first_name=request.POST['first_name']
+        user.last_name=request.POST['last_name']
+        user.email=request.POST['email']
+        user.save()
+        '''
 
     else:
         edit_profile_form = EditProfileForm(instance=request.user)
         # edit_profile_form.email=request.user
 
-    return render(request, 'accounts/editProfil.html',
+    return render(request, 'accounts/editProfile.html',
                   {'edit_profile_form': edit_profile_form,
-                   'user':user,
-                   'userProfile':userProfile,
-                   'isUpdated': isUpdated})
+                   'user': user,
+                   'userProfile': userProfile,
+                   'isUpdated': isUpdated
+                   })
 
 
 def change_password(request):
     isChanged = False
     if request.method == 'POST':
         change_password_form = PasswordChangeCustomForm(data=request.POST, user=request.user)
-
         if change_password_form.is_valid():
             change_password_form.save()
             isChanged = True
-
         else:
             print(change_password_form.errors)
-
     else:
         change_password_form = PasswordChangeCustomForm(user=request.user)
         # edit_profile_form.email=request.user
 
     return render(request, 'accounts/changePassword.html',
                   {'change_password_form': change_password_form,
-                   'isChanged': isChanged})
+                   'isChanged': isChanged
+                   })
 
 
 def create_recipe(request):
@@ -133,11 +134,14 @@ def create_recipe(request):
     error_Message = ""
     isOk = ""
     user = request.user
+    isConsumer=False
     if request.method == 'POST':
         user_form = CreateRecipeForm(request.POST)
         if user_form.is_valid():
             user = request.user
             userProfile = UserProfileInfo.objects.get(user=user)
+            if userProfile.user_type=="consumer":
+                isConsumer=True
             title = user_form.cleaned_data.get('title')
             description = user_form.cleaned_data.get('description')
             instructions = user_form.cleaned_data.get('instructions')
@@ -145,9 +149,6 @@ def create_recipe(request):
             level = request.POST.get('level')
             ingredients = request.POST.get('hiddenIngList')
             nutrients = request.POST.get('nutrientsTotal')
-            # ingredients=""
-            # for ing in ingList:
-            #    ingredients+="ing"
 
             if ingredients is None:
                 error_Message = "First select ingredients!"
@@ -160,7 +161,8 @@ def create_recipe(request):
             return render(request, 'accounts/list_recipes.html',
                           {'recipes': recipes,
                            'errorMessage': error_Message,
-                           'userProfile': userProfile
+                           'userProfile': userProfile,
+                           'isConsumer':isConsumer
                            })
             # return HttpResponseRedirect(reverse_lazy("accounts:list_recipes",kwargs={'pk': user.userprofileinfo.id}))
     else:
@@ -185,9 +187,12 @@ def create_recipe(request):
 class RecipeListView(ListView):
     def get(self, request, **kwargs):
         errorMessage = ""
+        isConsumer=False
         if request.method == "GET":
-            id = self.kwargs.get('user_profile_id')
-            userProfile = UserProfileInfo.objects.get(id=id)
+            user_profile_id = self.kwargs.get('user_profile_id')
+            userProfile = UserProfileInfo.objects.get(id=user_profile_id)
+            if userProfile.user_type=="consumer":
+                isConsumer=True
             recipes = Recipe.objects.filter(user=userProfile.user)
             if recipes is None:
                 errorMessage = "No recipe is created!"
@@ -195,6 +200,7 @@ class RecipeListView(ListView):
                           {'recipes': recipes,
                            'errorMessage': errorMessage,
                            'userProfile': userProfile,
+                           'isConsumer': isConsumer
                            })
 
 
@@ -202,8 +208,8 @@ class RecipeDetailView(DetailView):
     def get(self, request, **kwargs):
         errorMessage = ""
         if request.method == "GET":
-            id = self.kwargs.get('pk')
-            recipe = Recipe.objects.get(pk=id)
+            recipe_id = self.kwargs.get('pk')
+            recipe = Recipe.objects.get(pk=recipe_id)
             if recipe is None:
                 errorMessage = "No recipe is created!"
         return render(request, 'accounts/recipe_details.html',
@@ -215,8 +221,8 @@ class RecipeDetailView(DetailView):
         errorMessage = ""
         user_form = UpdateRecipeForm(request.POST)
         if request.method == "POST":
-            id = self.kwargs.get('pk')
-            recipe = Recipe.objects.get(pk=id)
+            recipe_id = self.kwargs.get('pk')
+            recipe = Recipe.objects.get(pk=recipe_id)
             if user_form.is_valid():
                 recipe.title = user_form.cleaned_data.get('title')
                 recipe.description = user_form.cleaned_data.get('description')
@@ -230,7 +236,7 @@ class RecipeDetailView(DetailView):
                 else:
                     if request.POST.get("Update"):
                         recipe.save()
-                    #else:
+                    # else:
                     #    recipe.delete()
                     #    return redirect(reverse('accounts:list_recipes'))
             return render(request, 'accounts/recipe_details.html',
@@ -281,7 +287,6 @@ def add_comment(request, user_id, recipe_id):
                        'comments': comments,
                        'likes': likes
                        })
-
     return render(request, 'accounts/add_comment.html',
                   {'recipe': recipe,
                    'errorMessage': errorMessage,
@@ -293,14 +298,14 @@ def like(request, user_id, recipe_id):
     errorMessage = ""
     recipe = Recipe.objects.get(pk=recipe_id)
     user = User.objects.get(pk=user_id)
+    userProfile=UserProfileInfo.objects.get(user=user)
     comments = Comment.objects.filter(recipe=recipe)
     likes = Like.objects.filter(recipe=recipe)
     if request.method == "GET":
-        alreadyGivenLikes = Like.objects.filter(Q(user=user), Q(recipe=recipe))
+        alreadyGivenLikes = Like.objects.filter(Q(user_profile=userProfile), Q(recipe=recipe))
         if alreadyGivenLikes.count() == 0:
-            Like.objects.create(user=user, recipe=recipe, description="description")
+            Like.objects.create(user_profile=userProfile, recipe=recipe, description="description")
             likes = Like.objects.filter(recipe=recipe)
-
     return render(request, 'accounts/recipe_just_details.html',
                   {'recipe': recipe,
                    'errorMessage': errorMessage,
@@ -312,18 +317,16 @@ def like(request, user_id, recipe_id):
 def create_menu(request):
     error_Message = ""
     recipes = Recipe.objects.filter(user=request.user)
-    menus=Menu.objects.filter(user=request.user)
+    menus = Menu.objects.filter(user=request.user)
     if request.method == 'POST':
         user = request.user
         userProfile = UserProfileInfo.objects.get(user=user)
         title = request.POST['title']
-
         if title is not None:
-            menus=Menu.objects.filter(title=title, user=user)
+            menus = Menu.objects.filter(title=title, user=user)
             if not menus:
                 Menu.objects.create(title=title, user=user)
                 menus = Menu.objects.filter(user=request.user)
-
         return render(request, 'accounts/list_menus.html',
                       {'menus': menus,
                        'errorMessage': error_Message,
@@ -339,8 +342,8 @@ class MenuListView(ListView):
     def get(self, request, **kwargs):
         errorMessage = ""
         if request.method == "GET":
-            id = self.kwargs.get('user_profile_id')
-            userProfile = UserProfileInfo.objects.get(id=id)
+            user_profile_id = self.kwargs.get('user_profile_id')
+            userProfile = UserProfileInfo.objects.get(id=user_profile_id)
             menus = Menu.objects.filter(user=userProfile.user)
             if menus is None:
                 errorMessage = "No menu is created!"
@@ -358,12 +361,12 @@ def search_list(request):
     displayRecipe = False
     if 'search' in request.GET:
         search_term = request.GET['search']
-        type = request.GET['type']
-        if type == "user":
+        search_type = request.GET['type']
+        if search_type == "user":
             users = User.objects.filter(username__icontains=search_term)
             userProfiles = userProfiles.filter(user__in=users)
             displayUser = True
-        elif type == "recipe":
+        elif search_type == "recipe":
             recipes = Recipe.objects.filter(Q(ingredients__icontains=search_term) | Q(title__icontains=search_term))
             displayRecipe = True
 
@@ -373,8 +376,11 @@ def search_list(request):
 
 
 def user_detail(request, user_profile_id):
+    isConsumer=False
     userProfile = UserProfileInfo.objects.get(id=user_profile_id)
-    return render(request, 'accounts/user_detail.html', {'userProfile': userProfile})
+    if userProfile.user_type == "consumer":
+        isConsumer = True
+    return render(request, 'accounts/user_detail.html', {'userProfile': userProfile , 'isConsumer': isConsumer})
 
 
 class MyProfileView(DetailView):
@@ -399,45 +405,48 @@ class MenuDetailView(DetailView):
     def get(self, request, **kwargs):
         errorMessage = ""
         if request.method == "GET":
-            id = self.kwargs.get('pk')
-            menu = Menu.objects.get(pk=id)
-            meals=Meal.objects.filter(menu=menu)
-            recipes=Recipe.objects.filter(user=request.user)
+            menu_id = self.kwargs.get('pk')
+            menu = Menu.objects.get(pk=menu_id)
+            meals = Meal.objects.filter(menu=menu)
+            recipes = Recipe.objects.filter(user=request.user)
             if menu is None:
                 errorMessage = "No recipe is created!"
         return render(request, 'accounts/menu_details.html',
                       {'menu': menu,
                        'errorMessage': errorMessage,
-                       'meals':meals,
-                       'recipes':recipes
+                       'meals': meals,
+                       'recipes': recipes
                        })
 
     def post(self, request, **kwargs):
         errorMessage = ""
+        isUpdated=False
         if request.method == "POST":
-            id = self.kwargs.get('pk')
-            menu = Menu.objects.get(pk=id)
+            menu_id = self.kwargs.get('pk')
+            menu = Menu.objects.get(pk=menu_id)
             meals = Meal.objects.filter(menu=menu)
             recipes = Recipe.objects.filter(user=request.user)
 
             if request.POST.get("Update"):
-                menu.title=request.POST['title']
+                menu.title = request.POST['title']
                 menu.save()
+                isUpdated=True
             elif request.POST.get("AddRecipe"):
-                recipeid = request.POST['recipeid']
-                if recipes is not None and recipeid!="0":
-
-                    recipe = Recipe.objects.get(id=recipeid)
-                    meal = Meal.objects.filter(recipe_id=recipeid,menu__title=menu.title)
+                recipe_id = request.POST['recipe_id']
+                if recipes is not None and recipe_id != "0":
+                    recipe = Recipe.objects.get(id=recipe_id)
+                    meal = Meal.objects.filter(recipe_id=recipe_id, menu__title=menu.title)
                     if not meal:
-                        Meal.objects.create(recipe_id=recipeid, title=recipe.title, menu=menu, menu_title=menu.title)
+                        Meal.objects.create(recipe_id=recipe_id, title=recipe.title, menu=menu, menu_title=menu.title)
                 meals = Meal.objects.filter(menu=menu)
                 recipes = Recipe.objects.filter(user=request.user)
+                isUpdated=True
                 return render(request, 'accounts/menu_details.html',
                               {'menu': menu,
                                'errorMessage': errorMessage,
                                'meals': meals,
-                               'recipes':recipes
+                               'recipes': recipes,
+                               'isUpdated':isUpdated
                                })
             else:
                 '''
@@ -452,7 +461,8 @@ class MenuDetailView(DetailView):
                           {'menu': menu,
                            'errorMessage': errorMessage,
                            'meals': meals,
-                           'recipes': recipes
+                           'recipes': recipes,
+                           'isUpdated':isUpdated
                            })
 
 
@@ -463,11 +473,10 @@ class MenuJustDetailView(DetailView):
             id = self.kwargs.get('pk')
             menu = Menu.objects.get(pk=id)
             meals = Meal.objects.filter(menu=menu)
-
             if menu is None:
                 errorMessage = "No recipe is created!"
         return render(request, 'accounts/menu_just_details.html',
                       {'menu': menu,
                        'errorMessage': errorMessage,
-                       'meals':meals,
+                       'meals': meals,
                        })
