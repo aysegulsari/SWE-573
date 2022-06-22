@@ -15,7 +15,7 @@ html5lib==1.0.1
 hyperlink==19.0.0
 idna==2.9
 incremental==17.5.0
-numpy==1.18.4
+numpy==1.22.0
 phonenumbers==8.12.6
 Pillow==7.1.2
 psycopg2==2.8.5
